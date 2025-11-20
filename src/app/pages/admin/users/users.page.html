@@ -1,13 +1,322 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>users</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Gestión de Usuarios</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">users</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="users-container" *ngIf="!loading && stats">
+
+    <!-- Stats Cards -->
+    <div class="stats-grid ion-padding">
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="people" color="medium"></ion-icon>
+          <h2>{{ stats.totalUsers }}</h2>
+          <p>Total Usuarios</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="heart" color="success"></ion-icon>
+          <h2>{{ stats.donors }}</h2>
+          <p>Donantes</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="briefcase" color="primary"></ion-icon>
+          <h2>{{ stats.managers }}</h2>
+          <p>Gestores</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="shield-checkmark" color="danger"></ion-icon>
+          <h2>{{ stats.admins }}</h2>
+          <p>Administradores</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="filters-section ion-padding">
+      <ion-searchbar
+        [(ngModel)]="searchTerm"
+        (ionInput)="onSearchChange($event)"
+        placeholder="Buscar por nombre, email o teléfono"
+        animated="true">
+      </ion-searchbar>
+
+      <ion-segment [(ngModel)]="selectedRole" (ionChange)="onRoleFilterChange($event)">
+        <ion-segment-button value="all">
+          <ion-label>Todos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="donor">
+          <ion-label>Donantes</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="manager">
+          <ion-label>Gestores</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="admin">
+          <ion-label>Admins</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- User Cards -->
+    <div class="users-grid ion-padding">
+      <ion-card class="user-card" *ngFor="let user of filteredUsers" button (click)="viewUserDetails(user)">
+        <ion-card-content>
+          <div class="user-header">
+            <div class="avatar">
+              <ion-icon name="person"></ion-icon>
+            </div>
+            <div class="user-info">
+              <h3>{{ user.name }}</h3>
+              <ion-badge [color]="getRoleColor(user.role)">
+                <ion-icon [name]="getRoleIcon(user.role)"></ion-icon>
+                {{ getRoleName(user.role) }}
+              </ion-badge>
+            </div>
+          </div>
+
+          <div class="user-details">
+            <div class="detail-row">
+              <ion-icon name="mail" color="medium"></ion-icon>
+              <span>{{ user.email }}</span>
+            </div>
+            <div class="detail-row" *ngIf="user.phone">
+              <ion-icon name="call" color="medium"></ion-icon>
+              <span>{{ user.phone }}</span>
+            </div>
+            <div class="detail-row">
+              <ion-icon name="calendar" color="medium"></ion-icon>
+              <span>Registrado: {{ formatDate(user.createdAt) }}</span>
+            </div>
+          </div>
+
+          <!-- Role-specific stats -->
+          <div class="role-stats" *ngIf="isDonor(user)">
+            <div class="stat-item">
+              <strong>{{ formatCurrency(user.totalDonated || 0) }}</strong>
+              <span>Donado</span>
+            </div>
+            <div class="stat-item">
+              <strong>{{ user.donationCount || 0 }}</strong>
+              <span>Donaciones</span>
+            </div>
+            <div class="stat-item">
+              <strong>{{ user.sponsoredBeneficiaries?.length || 0 }}</strong>
+              <span>Apadrinamientos</span>
+            </div>
+          </div>
+
+          <div class="role-stats" *ngIf="isManager(user)">
+            <div class="stat-item">
+              <strong>{{ user.completedDeliveries || 0 }}</strong>
+              <span>Entregas</span>
+            </div>
+            <div class="stat-item">
+              <strong>{{ user.activeDeliveries || 0 }}</strong>
+              <span>Activas</span>
+            </div>
+            <div class="stat-item">
+              <strong>{{ user.zone }}</strong>
+              <span>Zona</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <ion-button fill="clear" size="small" (click)="viewUserDetails(user); $event.stopPropagation()">
+              <ion-icon name="eye" slot="start"></ion-icon>
+              Ver detalles
+            </ion-button>
+            <ion-button fill="clear" size="small" color="danger" (click)="showDeleteConfirmation(user); $event.stopPropagation()">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state ion-padding" *ngIf="filteredUsers.length === 0">
+      <ion-icon name="people-outline" color="medium"></ion-icon>
+      <h3>No se encontraron usuarios</h3>
+      <p>Intenta ajustar los filtros de búsqueda</p>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando usuarios...</p>
+  </div>
+
+  <!-- User Details Modal -->
+  <ion-modal [isOpen]="showDetailsModal" (didDismiss)="closeDetailsModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Detalles del Usuario</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeDetailsModal()">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content *ngIf="selectedUser">
+        <div class="modal-content">
+          <!-- User Header -->
+          <div class="modal-user-header">
+            <div class="modal-avatar">
+              <ion-icon name="person" color="light"></ion-icon>
+            </div>
+            <h2>{{ selectedUser.name }}</h2>
+            <ion-badge [color]="getRoleColor(selectedUser.role)">
+              <ion-icon [name]="getRoleIcon(selectedUser.role)"></ion-icon>
+              {{ getRoleName(selectedUser.role) }}
+            </ion-badge>
+          </div>
+
+          <!-- Basic Info -->
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Información de Contacto</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <ion-icon name="mail" color="primary"></ion-icon>
+                  <div>
+                    <strong>Email</strong>
+                    <p>{{ selectedUser.email }}</p>
+                  </div>
+                </div>
+                <div class="info-item" *ngIf="selectedUser.phone">
+                  <ion-icon name="call" color="primary"></ion-icon>
+                  <div>
+                    <strong>Teléfono</strong>
+                    <p>{{ selectedUser.phone }}</p>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <ion-icon name="calendar" color="primary"></ion-icon>
+                  <div>
+                    <strong>Fecha de Registro</strong>
+                    <p>{{ formatDate(selectedUser.createdAt) }}</p>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Donor Details -->
+          <ion-card *ngIf="isDonor(selectedUser)">
+            <ion-card-header>
+              <ion-card-title>Información del Donante</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="donor-stats">
+                <div class="donor-stat">
+                  <ion-icon name="cash" color="success"></ion-icon>
+                  <strong>{{ formatCurrency(selectedUser.totalDonated || 0) }}</strong>
+                  <span>Total Donado</span>
+                </div>
+                <div class="donor-stat">
+                  <ion-icon name="gift" color="primary"></ion-icon>
+                  <strong>{{ selectedUser.donationCount || 0 }}</strong>
+                  <span>Donaciones</span>
+                </div>
+                <div class="donor-stat">
+                  <ion-icon name="heart" color="danger"></ion-icon>
+                  <strong>{{ selectedUser.sponsoredBeneficiaries?.length || 0 }}</strong>
+                  <span>Apadrinamientos</span>
+                </div>
+              </div>
+              <div class="categories" *ngIf="selectedUser.preferredCategories && selectedUser.preferredCategories.length > 0">
+                <strong>Categorías Preferidas:</strong>
+                <div class="category-chips">
+                  <ion-chip *ngFor="let category of selectedUser.preferredCategories" color="primary">
+                    <ion-label>{{ category }}</ion-label>
+                  </ion-chip>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Manager Details -->
+          <ion-card *ngIf="isManager(selectedUser)">
+            <ion-card-header>
+              <ion-card-title>Información del Gestor</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="manager-stats">
+                <div class="manager-stat">
+                  <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                  <strong>{{ selectedUser.completedDeliveries || 0 }}</strong>
+                  <span>Entregas Completadas</span>
+                </div>
+                <div class="manager-stat">
+                  <ion-icon name="time" color="warning"></ion-icon>
+                  <strong>{{ selectedUser.activeDeliveries || 0 }}</strong>
+                  <span>Entregas Activas</span>
+                </div>
+                <div class="manager-stat">
+                  <ion-icon name="location" color="primary"></ion-icon>
+                  <strong>{{ selectedUser.zone || 'No asignada' }}</strong>
+                  <span>Zona</span>
+                </div>
+                <div class="manager-stat">
+                  <ion-icon name="folder" color="tertiary"></ion-icon>
+                  <strong>{{ selectedUser.assignedCases?.length || 0 }}</strong>
+                  <span>Casos Asignados</span>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Admin Details -->
+          <ion-card *ngIf="isAdmin(selectedUser)">
+            <ion-card-header>
+              <ion-card-title>Información del Administrador</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="admin-info">
+                <div class="info-item">
+                  <ion-icon name="key" color="danger"></ion-icon>
+                  <div>
+                    <strong>Permisos</strong>
+                    <p>{{ selectedUser.permissions?.join(', ') || 'No especificados' }}</p>
+                  </div>
+                </div>
+              </div>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Actions -->
+          <div class="modal-actions ion-padding">
+            <ion-button expand="block" color="danger" (click)="showDeleteConfirmation(selectedUser); closeDetailsModal()">
+              <ion-icon name="trash" slot="start"></ion-icon>
+              Eliminar Usuario
+            </ion-button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
