@@ -1,13 +1,331 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>reports</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Reportes y Analytics</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportReport('pdf')">
+        <ion-icon name="download" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">reports</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="reports-container" *ngIf="!loading && reportData">
+
+    <!-- Period Filter -->
+    <div class="period-filter ion-padding">
+      <ion-segment [(ngModel)]="selectedPeriod" (ionChange)="onPeriodChange($event)" scrollable="true">
+        <ion-segment-button value="7days">
+          <ion-label>7 días</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="30days">
+          <ion-label>30 días</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="3months">
+          <ion-label>3 meses</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="6months">
+          <ion-label>6 meses</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="year">
+          <ion-label>1 año</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <p class="period-label">{{ reportData.period }}</p>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="key-metrics ion-padding">
+      <h2>Métricas Principales</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <ion-icon name="cash" color="success"></ion-icon>
+          <h3>{{ formatCurrency(reportData.totalRevenue) }}</h3>
+          <p>Ingresos Totales</p>
+        </div>
+
+        <div class="metric-card">
+          <ion-icon name="gift" color="primary"></ion-icon>
+          <h3>{{ formatNumber(reportData.totalDonations) }}</h3>
+          <p>Donaciones</p>
+        </div>
+
+        <div class="metric-card">
+          <ion-icon name="stats-chart" color="tertiary"></ion-icon>
+          <h3>{{ formatCurrency(reportData.averageDonation) }}</h3>
+          <p>Donación Promedio</p>
+        </div>
+
+        <div class="metric-card">
+          <ion-icon name="trending-up" color="warning"></ion-icon>
+          <h3>{{ formatPercent(reportData.donorGrowth) }}</h3>
+          <p>Crecimiento Donantes</p>
+        </div>
+
+        <div class="metric-card">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <h3>{{ formatPercent(reportData.completionRate) }}</h3>
+          <p>Tasa de Completación</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Selector -->
+    <div class="view-selector ion-padding">
+      <ion-segment [(ngModel)]="selectedView" (ionChange)="onViewChange($event)">
+        <ion-segment-button value="overview">
+          <ion-label>Resumen</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="financial">
+          <ion-label>Financiero</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="donations">
+          <ion-label>Donaciones</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="managers">
+          <ion-label>Gestores</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Overview View -->
+    <div *ngIf="selectedView === 'overview'" class="ion-padding">
+
+      <!-- Revenue Comparison Chart -->
+      <ion-card class="chart-card">
+        <ion-card-header>
+          <ion-card-title>Comparativa de Ingresos</ion-card-title>
+          <ion-card-subtitle>Mes actual vs mes anterior</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="comparison-chart">
+            <div class="comparison-item" *ngFor="let item of revenueComparison">
+              <div class="bars">
+                <div class="bar-group">
+                  <div class="bar current"
+                       [style.height.%]="getComparisonBarHeight(item.current, getMaxComparisonValue())">
+                  </div>
+                  <div class="bar previous"
+                       [style.height.%]="getComparisonBarHeight(item.previous, getMaxComparisonValue())">
+                  </div>
+                </div>
+              </div>
+              <div class="labels">
+                <div class="month">{{ item.month }}</div>
+                <div class="values">
+                  <span class="current">{{ formatCurrency(item.current) }}</span>
+                  <span class="previous">{{ formatCurrency(item.previous) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="color-box current"></span>
+              <span>Mes Actual</span>
+            </div>
+            <div class="legend-item">
+              <span class="color-box previous"></span>
+              <span>Mes Anterior</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Export Actions -->
+      <ion-card class="export-card">
+        <ion-card-header>
+          <ion-card-title>Exportar Reporte</ion-card-title>
+          <ion-card-subtitle>Descarga el reporte en diferentes formatos</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="export-buttons">
+            <ion-button expand="block" (click)="exportReport('pdf')">
+              <ion-icon name="document-text" slot="start"></ion-icon>
+              Exportar PDF
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="exportReport('excel')">
+              <ion-icon name="grid" slot="start"></ion-icon>
+              Exportar Excel
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="exportReport('csv')">
+              <ion-icon name="list" slot="start"></ion-icon>
+              Exportar CSV
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+
+    <!-- Financial View -->
+    <div *ngIf="selectedView === 'financial'" class="ion-padding">
+
+      <ion-card class="chart-card">
+        <ion-card-header>
+          <ion-card-title>Desglose por Categoría</ion-card-title>
+          <ion-card-subtitle>Distribución de donaciones por tipo</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="category-breakdown">
+            <div class="category-item" *ngFor="let cat of donationsByCategory">
+              <div class="category-header">
+                <div class="category-info">
+                  <ion-icon [name]="'ellipse'" [color]="getCategoryColor(cat.category)"></ion-icon>
+                  <span class="category-name">{{ getCategoryName(cat.category) }}</span>
+                </div>
+                <div class="category-amount">
+                  <strong>{{ formatCurrency(cat.amount) }}</strong>
+                  <span class="percentage">{{ formatPercent(cat.percentage) }}</span>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"
+                     [style.width.%]="cat.percentage"
+                     [ngClass]="'bg-' + getCategoryColor(cat.category)">
+                </div>
+              </div>
+              <div class="category-count">{{ cat.count }} donaciones</div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="summary-card">
+        <ion-card-header>
+          <ion-card-title>Resumen Financiero</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <ion-icon name="arrow-up-circle" color="success"></ion-icon>
+              <div>
+                <strong>{{ formatCurrency(reportData.totalRevenue) }}</strong>
+                <p>Total Recaudado</p>
+              </div>
+            </div>
+            <div class="summary-item">
+              <ion-icon name="calculator" color="primary"></ion-icon>
+              <div>
+                <strong>{{ formatCurrency(reportData.averageDonation) }}</strong>
+                <p>Donación Promedio</p>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+
+    <!-- Donations View -->
+    <div *ngIf="selectedView === 'donations'" class="ion-padding">
+
+      <ion-card class="donors-card">
+        <ion-card-header>
+          <ion-card-title>Top Donantes</ion-card-title>
+          <ion-card-subtitle>Contribuyentes más generosos</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full">
+            <ion-item *ngFor="let donor of topDonors; let i = index">
+              <div class="ranking" slot="start">
+                <span class="rank-number">{{ i + 1 }}</span>
+              </div>
+              <ion-label>
+                <h3>{{ donor.name }}</h3>
+                <p>{{ donor.count }} donaciones</p>
+              </ion-label>
+              <div slot="end" class="donor-amount">
+                <strong>{{ formatCurrency(donor.amount) }}</strong>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stats-card">
+        <ion-card-header>
+          <ion-card-title>Estadísticas de Donaciones</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="stats-list">
+            <div class="stat-row">
+              <span>Total de Donaciones</span>
+              <strong>{{ formatNumber(reportData.totalDonations) }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Donación Promedio</span>
+              <strong>{{ formatCurrency(reportData.averageDonation) }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Crecimiento</span>
+              <strong class="success">+{{ formatPercent(reportData.donorGrowth) }}</strong>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+
+    <!-- Managers View -->
+    <div *ngIf="selectedView === 'managers'" class="ion-padding">
+
+      <ion-card class="performance-card">
+        <ion-card-header>
+          <ion-card-title>Performance de Gestores</ion-card-title>
+          <ion-card-subtitle>Métricas de eficiencia y calidad</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="manager-list">
+            <div class="manager-item" *ngFor="let manager of managerPerformance">
+              <div class="manager-header">
+                <h3>{{ manager.name }}</h3>
+                <ion-badge color="success">
+                  <ion-icon name="star"></ion-icon>
+                  {{ manager.rating }}
+                </ion-badge>
+              </div>
+              <div class="manager-stats">
+                <div class="stat">
+                  <ion-icon name="checkmark-done" color="success"></ion-icon>
+                  <div>
+                    <strong>{{ manager.deliveries }}</strong>
+                    <p>Entregas</p>
+                  </div>
+                </div>
+                <div class="stat">
+                  <ion-icon name="speedometer" color="primary"></ion-icon>
+                  <div>
+                    <strong>{{ manager.efficiency }}%</strong>
+                    <p>Eficiencia</p>
+                  </div>
+                </div>
+              </div>
+              <div class="efficiency-bar">
+                <div class="efficiency-fill"
+                     [style.width.%]="manager.efficiency"
+                     [ngClass]="{'high': manager.efficiency >= 90, 'medium': manager.efficiency >= 80 && manager.efficiency < 90, 'low': manager.efficiency < 80}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Generando reportes...</p>
+  </div>
+
 </ion-content>
