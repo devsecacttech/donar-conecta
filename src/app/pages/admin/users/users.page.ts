@@ -225,7 +225,7 @@ export class UsersPage implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('es-ES', {
+    return new Date(date).toLocaleDateString('es-EC', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -233,9 +233,9 @@ export class UsersPage implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-EC', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'USD'
     }).format(amount);
   }
 

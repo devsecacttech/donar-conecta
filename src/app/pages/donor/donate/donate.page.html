@@ -50,7 +50,7 @@
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-label position="floating">Monto (€) *</ion-label>
+          <ion-label position="floating">Monto ($) *</ion-label>
           <ion-input type="number" [(ngModel)]="amount" placeholder="0.00" min="1"></ion-input>
         </ion-item>
 
@@ -64,11 +64,11 @@
         </ion-item>
 
         <div class="amount-presets ion-margin-top">
-          <ion-button fill="outline" size="small" (click)="amount = 10">10€</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 25">25€</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 50">50€</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 100">100€</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 250">250€</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 10">10$</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 25">25$</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 50">50$</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 100">100$</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 250">250$</ion-button>
         </div>
       </ion-card-content>
     </ion-card>
@@ -156,7 +156,7 @@
       </ion-card-header>
       <ion-card-content>
         <ion-item>
-          <ion-label position="floating">Monto Mensual (€) *</ion-label>
+          <ion-label position="floating">Monto Mensual ($) *</ion-label>
           <ion-input type="number" [(ngModel)]="amount" placeholder="0.00" min="1"></ion-input>
         </ion-item>
 
@@ -184,10 +184,10 @@
         </ion-item>
 
         <div class="amount-presets ion-margin-top">
-          <ion-button fill="outline" size="small" (click)="amount = 15">15€/mes</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 30">30€/mes</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 50">50€/mes</ion-button>
-          <ion-button fill="outline" size="small" (click)="amount = 100">100€/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 15">15$/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 30">30$/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 50">50$/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 100">100$/mes</ion-button>
         </div>
       </ion-card-content>
     </ion-card>
@@ -244,7 +244,7 @@
         </div>
         <div class="summary-item" *ngIf="amount > 0">
           <span class="label">Monto:</span>
-          <span class="value">{{ amount }}€</span>
+          <span class="value">{{ amount }}$</span>
         </div>
         <div class="summary-item" *ngIf="items.length > 0">
           <span class="label">Artículos:</span>

@@ -407,7 +407,7 @@ export class CasesPage implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString('es-EC', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -415,7 +415,7 @@ export class CasesPage implements OnInit {
   }
 
   formatDateTime(date: Date): string {
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString('es-EC', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

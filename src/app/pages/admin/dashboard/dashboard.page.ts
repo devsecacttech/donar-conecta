@@ -74,14 +74,14 @@ export class DashboardPage implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-EC', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'USD'
     }).format(amount);
   }
 
   formatNumber(num: number): string {
-    return new Intl.NumberFormat('es-ES').format(num);
+    return new Intl.NumberFormat('es-EC').format(num);
   }
 
   formatPercent(value: number): string {

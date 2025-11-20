@@ -16,14 +16,14 @@ export class CaseService {
     return [
       {
         id: 'c1',
-        title: 'Material escolar urgente - Familia López',
+        title: 'Material escolar urgente - Familia Tamayo',
         beneficiaryId: 'b1',
-        beneficiaryName: 'Niño Juan - Familia López',
+        beneficiaryName: 'Niño Juan - Familia Tamayo',
         description: 'Niño de 10 años necesita material escolar para el nuevo curso. La familia no puede costearlo.',
         priority: CasePriority.HIGH,
         status: CaseStatus.COMPLETED,
         assignedManagerId: '2',
-        assignedManagerName: 'Carlos Rodríguez',
+        assignedManagerName: 'Carlos Ponce',
         createdAt: new Date('2024-10-15'),
         updatedAt: new Date('2024-11-05'),
         completedAt: new Date('2024-11-05'),
@@ -41,7 +41,7 @@ export class CaseService {
           {
             id: 'n1',
             authorId: '2',
-            authorName: 'Carlos Rodríguez',
+            authorName: 'Carlos Ponce',
             content: 'Material entregado con éxito. La familia muy agradecida.',
             createdAt: new Date('2024-11-05')
           }
@@ -49,14 +49,14 @@ export class CaseService {
       },
       {
         id: 'c2',
-        title: 'Ayuda alimentaria - Familia García',
+        title: 'Ayuda alimentaria - Familia Salazar',
         beneficiaryId: 'b2',
-        beneficiaryName: 'Familia García',
+        beneficiaryName: 'Familia Salazar',
         description: 'Familia de 5 miembros en situación de vulnerabilidad necesita alimentos básicos.',
         priority: CasePriority.URGENT,
         status: CaseStatus.IN_PROGRESS,
         assignedManagerId: '5',
-        assignedManagerName: 'Laura Sánchez',
+        assignedManagerName: 'Laura Zambrano',
         createdAt: new Date('2024-11-10'),
         updatedAt: new Date('2024-11-12'),
         requiredDonations: [
@@ -79,7 +79,7 @@ export class CaseService {
           {
             id: 'n2',
             authorId: '5',
-            authorName: 'Laura Sánchez',
+            authorName: 'Laura Zambrano',
             content: 'Alimentos entregados. Aún necesitan productos de higiene.',
             createdAt: new Date('2024-11-12')
           }
@@ -89,12 +89,12 @@ export class CaseService {
         id: 'c3',
         title: 'Medicamentos - Sra. Ana',
         beneficiaryId: 'b3',
-        beneficiaryName: 'Señora Ana - Familia Martínez',
+        beneficiaryName: 'Señora Ana - Familia Andrade',
         description: 'Pensionista con diabetes necesita ayuda para medicación mensual.',
         priority: CasePriority.HIGH,
         status: CaseStatus.IN_PROGRESS,
         assignedManagerId: '2',
-        assignedManagerName: 'Carlos Rodríguez',
+        assignedManagerName: 'Carlos Ponce',
         createdAt: new Date('2024-11-15'),
         updatedAt: new Date('2024-11-18'),
         requiredDonations: [
@@ -111,7 +111,7 @@ export class CaseService {
           {
             id: 'n3',
             authorId: '2',
-            authorName: 'Carlos Rodríguez',
+            authorName: 'Carlos Ponce',
             content: 'Contactado con farmacia solidaria. Pendiente de donación.',
             createdAt: new Date('2024-11-18')
           }
@@ -119,9 +119,9 @@ export class CaseService {
       },
       {
         id: 'c4',
-        title: 'Ropa de invierno - Familia Rodríguez',
+        title: 'Ropa - Familia Vargas',
         beneficiaryId: 'b4',
-        beneficiaryName: 'Familia Rodríguez',
+        beneficiaryName: 'Familia Vargas',
         description: 'Familia numerosa necesita ropa de invierno para los 4 niños.',
         priority: CasePriority.MEDIUM,
         status: CaseStatus.OPEN,
@@ -140,9 +140,9 @@ export class CaseService {
       },
       {
         id: 'c5',
-        title: 'Clases de español - Familia Fernández',
+        title: 'Útiles escolares - Familia Chávez',
         beneficiaryId: 'b5',
-        beneficiaryName: 'Niña María - Familia Fernández',
+        beneficiaryName: 'Niña María - Familia Chávez',
         description: 'Familia refugiada necesita clases de español para integrarse mejor.',
         priority: CasePriority.MEDIUM,
         status: CaseStatus.OPEN,

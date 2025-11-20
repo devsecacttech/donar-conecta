@@ -72,7 +72,7 @@ export class ImpactStoriesPage implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('es-ES', {
+    return new Date(date).toLocaleDateString('es-EC', {
       day: '2-digit',
       month: 'long',
       year: 'numeric'

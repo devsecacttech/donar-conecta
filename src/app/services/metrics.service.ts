@@ -104,12 +104,12 @@ export class MetricsService {
 
         for (let i = 5; i >= 0; i--) {
           const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          const monthKey = date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+          const monthKey = date.toLocaleDateString('es-EC', { month: 'short', year: 'numeric' });
           monthlyMap.set(monthKey, { count: 0, amount: 0 });
         }
 
         donations.forEach(d => {
-          const monthKey = d.createdAt.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+          const monthKey = d.createdAt.toLocaleDateString('es-EC', { month: 'short', year: 'numeric' });
           const existing = monthlyMap.get(monthKey);
           if (existing) {
             monthlyMap.set(monthKey, {
@@ -279,12 +279,12 @@ export class MetricsService {
 
         for (let i = 5; i >= 0; i--) {
           const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          const monthKey = date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+          const monthKey = date.toLocaleDateString('es-EC', { month: 'short', year: 'numeric' });
           monthlyMap.set(monthKey, { count: 0, amount: 0 });
         }
 
         donations.forEach(d => {
-          const monthKey = d.createdAt.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+          const monthKey = d.createdAt.toLocaleDateString('es-EC', { month: 'short', year: 'numeric' });
           const existing = monthlyMap.get(monthKey);
           if (existing) {
             monthlyMap.set(monthKey, {

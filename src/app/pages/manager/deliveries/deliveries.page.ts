@@ -240,7 +240,7 @@ export class DeliveriesPage implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString('es-EC', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'

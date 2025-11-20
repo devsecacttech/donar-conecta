@@ -86,18 +86,18 @@ export class DashboardPage implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-EC', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'USD'
     }).format(amount);
   }
 
   formatNumber(num: number): string {
-    return new Intl.NumberFormat('es-ES').format(num);
+    return new Intl.NumberFormat('es-EC').format(num);
   }
 
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('es-ES', {
+    return new Date(date).toLocaleDateString('es-EC', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'

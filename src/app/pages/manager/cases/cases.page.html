@@ -85,7 +85,7 @@
               </ion-icon>
               <span [class.fulfilled]="req.fulfilled">
                 {{ req.category }} - {{ req.description }}
-                <span class="cost" *ngIf="req.estimatedCost">({{ req.estimatedCost }}€)</span>
+                <span class="cost" *ngIf="req.estimatedCost">({{ req.estimatedCost }}$)</span>
               </span>
             </div>
           </div>
@@ -169,7 +169,7 @@
                 <ion-label>
                   <h3>{{ req.category }}</h3>
                   <p>{{ req.description }}</p>
-                  <p *ngIf="req.estimatedCost"><strong>Coste estimado:</strong> {{ req.estimatedCost }}€</p>
+                  <p *ngIf="req.estimatedCost"><strong>Coste estimado:</strong> {{ req.estimatedCost }}$</p>
                 </ion-label>
               </ion-item>
             </ion-list>

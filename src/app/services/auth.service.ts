@@ -9,15 +9,15 @@ export class AuthService {
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser: Observable<User | null>;
 
-  // Mock users para demo
+  // Mock users para demo - Ecuador
   private mockUsers: User[] = [
     {
       id: '1',
-      name: 'María García',
+      name: 'María Quishpe',
       email: 'maria@donor.com',
       role: UserRole.DONOR,
       avatar: 'assets/avatars/maria.jpg',
-      phone: '+34 600 000 001',
+      phone: '+593 98 765 4321',
       createdAt: new Date('2024-01-15'),
       totalDonated: 5420,
       donationCount: 28,
@@ -26,34 +26,34 @@ export class AuthService {
     } as Donor,
     {
       id: '2',
-      name: 'Carlos Rodríguez',
+      name: 'Carlos Ponce',
       email: 'carlos@manager.com',
       role: UserRole.MANAGER,
       avatar: 'assets/avatars/carlos.jpg',
-      phone: '+34 600 000 002',
+      phone: '+593 98 123 4567',
       createdAt: new Date('2023-11-10'),
       assignedCases: ['c1', 'c2', 'c3'],
       completedDeliveries: 156,
       activeDeliveries: 8,
-      zone: 'Madrid Centro'
+      zone: 'Quito Centro'
     } as Manager,
     {
       id: '3',
-      name: 'Ana Martínez',
+      name: 'Ana Villavicencio',
       email: 'ana@admin.com',
       role: UserRole.ADMIN,
       avatar: 'assets/avatars/ana.jpg',
-      phone: '+34 600 000 003',
+      phone: '+593 99 234 5678',
       createdAt: new Date('2023-06-01'),
       permissions: ['all']
     } as Admin,
     {
       id: '4',
-      name: 'Pedro López',
+      name: 'Pedro Morales',
       email: 'pedro@donor.com',
       role: UserRole.DONOR,
       avatar: 'assets/avatars/pedro.jpg',
-      phone: '+34 600 000 004',
+      phone: '+593 98 345 6789',
       createdAt: new Date('2024-03-20'),
       totalDonated: 2150,
       donationCount: 12,
@@ -62,16 +62,16 @@ export class AuthService {
     } as Donor,
     {
       id: '5',
-      name: 'Laura Sánchez',
+      name: 'Laura Zambrano',
       email: 'laura@manager.com',
       role: UserRole.MANAGER,
       avatar: 'assets/avatars/laura.jpg',
-      phone: '+34 600 000 005',
+      phone: '+593 99 456 7890',
       createdAt: new Date('2023-08-15'),
       assignedCases: ['c4', 'c5'],
       completedDeliveries: 89,
       activeDeliveries: 5,
-      zone: 'Barcelona Sur'
+      zone: 'Guayaquil Norte'
     } as Manager
   ];
 

@@ -58,7 +58,7 @@
           <div class="delivery-info">
             <div class="info-item" *ngIf="delivery.amount">
               <ion-icon name="cash-outline" color="success"></ion-icon>
-              <span>{{ delivery.amount }}€</span>
+              <span>{{ delivery.amount }}$</span>
             </div>
             <div class="info-item">
               <ion-icon name="person-outline" color="primary"></ion-icon>
@@ -149,7 +149,7 @@
           <ion-card-content>
             <p>{{ selectedDelivery.description }}</p>
             <div class="summary-amount" *ngIf="selectedDelivery.amount">
-              <strong>Monto:</strong> {{ selectedDelivery.amount }}€
+              <strong>Monto:</strong> {{ selectedDelivery.amount }}$
             </div>
           </ion-card-content>
         </ion-card>

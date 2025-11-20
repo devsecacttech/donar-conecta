@@ -245,12 +245,12 @@
                   [fill]="sponsorshipAmount === amount ? 'solid' : 'outline'"
                   [color]="sponsorshipAmount === amount ? 'success' : 'medium'"
                   (click)="selectAmount(amount)">
-                  {{ amount }}€
+                  {{ amount }}$
                 </ion-button>
               </div>
 
               <ion-item>
-                <ion-label position="floating">Monto personalizado (€)</ion-label>
+                <ion-label position="floating">Monto personalizado ($)</ion-label>
                 <ion-input
                   type="number"
                   [(ngModel)]="sponsorshipAmount"
@@ -268,7 +268,7 @@
                   <ion-radio slot="start" value="monthly"></ion-radio>
                   <ion-label>
                     <h3>Mensual</h3>
-                    <p>{{ sponsorshipAmount }}€ cada mes</p>
+                    <p>{{ sponsorshipAmount }}$ cada mes</p>
                   </ion-label>
                 </ion-item>
 
@@ -276,7 +276,7 @@
                   <ion-radio slot="start" value="quarterly"></ion-radio>
                   <ion-label>
                     <h3>Trimestral</h3>
-                    <p>{{ sponsorshipAmount * 3 }}€ cada 3 meses</p>
+                    <p>{{ sponsorshipAmount * 3 }}$ cada 3 meses</p>
                   </ion-label>
                 </ion-item>
 
@@ -284,7 +284,7 @@
                   <ion-radio slot="start" value="annual"></ion-radio>
                   <ion-label>
                     <h3>Anual</h3>
-                    <p>{{ sponsorshipAmount * 12 }}€ al año</p>
+                    <p>{{ sponsorshipAmount * 12 }}$ al año</p>
                   </ion-label>
                 </ion-item>
               </ion-radio-group>
@@ -321,7 +321,7 @@
             </div>
             <div class="summary-row highlight">
               <span>Total a donar:</span>
-              <strong class="amount">{{ sponsorshipAmount }}€</strong>
+              <strong class="amount">{{ sponsorshipAmount }}$</strong>
             </div>
             <p class="summary-note">
               <ion-icon name="information-circle-outline"></ion-icon>

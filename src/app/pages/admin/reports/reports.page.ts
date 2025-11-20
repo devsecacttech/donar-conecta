@@ -104,9 +104,9 @@ export class ReportsPage implements OnInit {
 
     // Manager performance
     this.managerPerformance = [
-      { name: 'Carlos Rodríguez', deliveries: 156, rating: 4.8, efficiency: 94 },
-      { name: 'Laura Sánchez', deliveries: 89, rating: 4.6, efficiency: 88 },
-      { name: 'Carmen Díaz', deliveries: 42, rating: 4.9, efficiency: 96 }
+      { name: 'Carlos Ponce', deliveries: 156, rating: 4.8, efficiency: 94 },
+      { name: 'Laura Zambrano', deliveries: 89, rating: 4.6, efficiency: 88 },
+      { name: 'Carmen Villavicencio', deliveries: 42, rating: 4.9, efficiency: 96 }
     ];
 
     // Top donors
@@ -165,14 +165,14 @@ export class ReportsPage implements OnInit {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-EC', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'USD'
     }).format(amount);
   }
 
   formatNumber(num: number): string {
-    return new Intl.NumberFormat('es-ES').format(num);
+    return new Intl.NumberFormat('es-EC').format(num);
   }
 
   formatPercent(value: number): string {
@@ -180,7 +180,7 @@ export class ReportsPage implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('es-ES', {
+    return new Date(date).toLocaleDateString('es-EC', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'

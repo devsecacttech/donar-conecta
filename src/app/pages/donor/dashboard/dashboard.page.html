@@ -25,7 +25,7 @@
           <div class="metric-icon">
             <ion-icon name="cash-outline" color="success"></ion-icon>
           </div>
-          <div class="metric-value">{{ metrics?.totalDonated || 0 | number:'1.2-2' }}€</div>
+          <div class="metric-value">{{ metrics?.totalDonated || 0 | number:'1.2-2' }}$</div>
           <div class="metric-label">Total Donado</div>
         </ion-card-content>
       </ion-card>
@@ -146,7 +146,7 @@
             <h2>{{ getDonationTypeText(donation.type) }}</h2>
             <p>{{ donation.description }}</p>
             <p *ngIf="donation.amount">
-              <strong>{{ donation.amount }}€</strong>
+              <strong>{{ donation.amount }}$</strong>
             </p>
             <p class="donation-date">{{ formatDate(donation.createdAt) }}</p>
           </ion-label>
