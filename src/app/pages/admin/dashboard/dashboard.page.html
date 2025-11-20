@@ -1,13 +1,305 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>dashboard</ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>Panel de Administración</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">dashboard</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="dashboard-container" *ngIf="!loading && metrics">
+
+    <!-- Welcome Section -->
+    <div class="welcome-section ion-padding">
+      <ion-icon name="shield-checkmark" color="light"></ion-icon>
+      <h1>Bienvenido, {{ adminName }}</h1>
+      <p>Panel de control del sistema Donar Conecta</p>
+    </div>
+
+    <!-- Overview Metrics -->
+    <div class="metrics-grid ion-padding">
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="cash" color="success"></ion-icon>
+          <h2>{{ formatCurrency(metrics.financialMetrics.totalRevenue) }}</h2>
+          <p>Total Recaudado</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="gift" color="primary"></ion-icon>
+          <h2>{{ formatNumber(metrics.overview.totalDonations) }}</h2>
+          <p>Donaciones Totales</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="people" color="tertiary"></ion-icon>
+          <h2>{{ formatNumber(metrics.donorMetrics.totalDonors) }}</h2>
+          <p>Donantes Registrados</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="person-add" color="warning"></ion-icon>
+          <h2>{{ formatNumber(metrics.donorMetrics.newDonorsThisMonth) }}</h2>
+          <p>Nuevos Este Mes</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="folder-open" color="danger"></ion-icon>
+          <h2>{{ formatNumber(metrics.overview.activeCases) }}</h2>
+          <p>Casos Activos</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="heart" color="secondary"></ion-icon>
+          <h2>{{ formatNumber(metrics.overview.activeSponsorship) }}</h2>
+          <p>Apadrinamientos</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions ion-padding">
+      <h3>Acciones Rápidas</h3>
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="navigateToUsers()">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          Gestionar Usuarios
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="navigateToCases()">
+          <ion-icon name="folder-open-outline" slot="start"></ion-icon>
+          Gestionar Casos
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="navigateToReports()">
+          <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+          Ver Reportes
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section ion-padding">
+      <div class="section-header">
+        <h3>Análisis de Tendencias</h3>
+        <ion-segment [(ngModel)]="selectedChartView" (ionChange)="onChartViewChange($event)">
+          <ion-segment-button value="donations">
+            <ion-label>Por Mes</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="categories">
+            <ion-label>Por Categoría</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Monthly Trend Chart -->
+      <ion-card *ngIf="selectedChartView === 'donations'" class="chart-card">
+        <ion-card-header>
+          <ion-card-title>Donaciones Mensuales</ion-card-title>
+          <ion-card-subtitle>Últimos 6 meses</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="bar-chart">
+            <div class="bar-container" *ngFor="let month of metrics.financialMetrics.monthlyTrend">
+              <div class="bar-wrapper">
+                <div
+                  class="bar"
+                  [style.height.%]="getBarHeight(month.amount)"
+                  [attr.data-amount]="formatCurrency(month.amount)">
+                </div>
+              </div>
+              <div class="bar-label">
+                <div class="month">{{ getMonthLabel(month.month) }}</div>
+                <div class="amount">{{ formatCurrency(month.amount) }}</div>
+                <div class="count">{{ month.count }} donaciones</div>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Categories Chart -->
+      <ion-card *ngIf="selectedChartView === 'categories'" class="chart-card">
+        <ion-card-header>
+          <ion-card-title>Distribución por Categoría</ion-card-title>
+          <ion-card-subtitle>Análisis del destino de las donaciones</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="category-list">
+            <div class="category-item" *ngFor="let cat of metrics.financialMetrics.byCategory">
+              <div class="category-header">
+                <div class="category-info">
+                  <ion-icon [name]="'ellipse'" [color]="getCategoryColor(cat.category)"></ion-icon>
+                  <span class="category-name">{{ getCategoryName(cat.category) }}</span>
+                </div>
+                <div class="category-stats">
+                  <strong>{{ formatCurrency(cat.amount) }}</strong>
+                  <span class="percentage">{{ formatPercent(cat.percentage) }}</span>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="cat.percentage"
+                  [ngClass]="'bg-' + getCategoryColor(cat.category)">
+                </div>
+              </div>
+              <div class="category-count">{{ cat.count }} donaciones</div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Top Performers -->
+    <div class="top-performers ion-padding">
+      <div class="performers-grid">
+
+        <!-- Top Donors -->
+        <ion-card class="performers-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="star" color="warning"></ion-icon>
+              Top Donantes
+            </ion-card-title>
+            <ion-card-subtitle>Los más generosos</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none">
+              <ion-item *ngFor="let donor of metrics.donorMetrics.topDonors; let i = index">
+                <div class="ranking" slot="start">
+                  <span class="rank-number">{{ i + 1 }}</span>
+                </div>
+                <ion-label>
+                  <h3>{{ donor.name }}</h3>
+                  <p>{{ donor.donationCount }} donaciones</p>
+                </ion-label>
+                <div class="donor-amount" slot="end">
+                  <strong>{{ formatCurrency(donor.totalDonated) }}</strong>
+                </div>
+              </ion-item>
+            </ion-list>
+
+            <div class="empty-state" *ngIf="metrics.donorMetrics.topDonors.length === 0">
+              <ion-icon name="people-outline" color="medium"></ion-icon>
+              <p>No hay datos disponibles</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Top Managers -->
+        <ion-card class="performers-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="trophy" color="success"></ion-icon>
+              Top Gestores
+            </ion-card-title>
+            <ion-card-subtitle>Los más eficientes</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none">
+              <ion-item *ngFor="let manager of metrics.managerMetrics.topManagers; let i = index">
+                <div class="ranking" slot="start">
+                  <span class="rank-number">{{ i + 1 }}</span>
+                </div>
+                <ion-label>
+                  <h3>{{ manager.name }}</h3>
+                  <p>{{ manager.completedDeliveries }} entregas</p>
+                </ion-label>
+                <div class="manager-rating" slot="end">
+                  <ion-icon name="star" color="warning"></ion-icon>
+                  <strong>{{ manager.averageRating }}</strong>
+                </div>
+              </ion-item>
+            </ion-list>
+
+            <div class="empty-state" *ngIf="metrics.managerMetrics.topManagers.length === 0">
+              <ion-icon name="people-outline" color="medium"></ion-icon>
+              <p>No hay datos disponibles</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+      </div>
+    </div>
+
+    <!-- System Stats -->
+    <div class="system-stats ion-padding">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Estadísticas del Sistema</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <ion-icon name="people" color="primary"></ion-icon>
+              <div class="stat-content">
+                <h4>{{ formatNumber(metrics.donorMetrics.activeDonors) }}</h4>
+                <p>Donantes Activos (90 días)</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="person" color="secondary"></ion-icon>
+              <div class="stat-content">
+                <h4>{{ formatNumber(metrics.managerMetrics.totalManagers) }}</h4>
+                <p>Gestores en el Sistema</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="heart" color="danger"></ion-icon>
+              <div class="stat-content">
+                <h4>{{ formatNumber(metrics.overview.beneficiariesHelped) }}</h4>
+                <p>Beneficiarios Atendidos</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="images" color="tertiary"></ion-icon>
+              <div class="stat-content">
+                <h4>{{ formatNumber(metrics.overview.impactStories) }}</h4>
+                <p>Historias de Impacto</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="time" color="warning"></ion-icon>
+              <div class="stat-content">
+                <h4>{{ formatNumber(metrics.managerMetrics.averageResponseTime) }}h</h4>
+                <p>Tiempo Promedio Respuesta</p>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <ion-icon name="folder" color="success"></ion-icon>
+              <div class="stat-content">
+                <h4>{{ formatNumber(metrics.overview.activeCases) }}</h4>
+                <p>Casos en Gestión</p>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando dashboard...</p>
+  </div>
+
 </ion-content>
