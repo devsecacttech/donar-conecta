@@ -1,0 +1,168 @@
+.stories-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-info {
+  text-align: center;
+  padding: 30px 20px;
+
+  .header-icon {
+    font-size: 50px;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: 1.6em;
+    color: var(--ion-color-dark);
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 1em;
+    margin: 0;
+  }
+}
+
+.empty-card {
+  margin: 40px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 80px;
+    opacity: 0.4;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 1.3em;
+    color: var(--ion-color-dark);
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.story-card {
+  margin: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  .story-image {
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--ion-color-light);
+    position: relative;
+
+    .story-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+  }
+
+  .story-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9em;
+      color: var(--ion-color-medium);
+
+      ion-icon {
+        font-size: 1.1em;
+      }
+    }
+  }
+
+  .story-description {
+    font-size: 0.95em;
+    line-height: 1.5;
+    color: var(--ion-color-dark);
+    margin-bottom: 12px;
+  }
+
+  .beneficiary-message {
+    background: var(--ion-color-light);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+
+    ion-icon {
+      flex-shrink: 0;
+      font-size: 1.2em;
+      margin-top: 2px;
+    }
+
+    em {
+      font-size: 0.9em;
+      color: var(--ion-color-dark);
+      line-height: 1.4;
+    }
+  }
+
+  .story-footer {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--ion-color-light);
+    padding-top: 12px;
+    margin-top: 12px;
+
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85em;
+      color: var(--ion-color-medium);
+
+      ion-icon {
+        font-size: 1.1em;
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+@media (max-width: 768px) {
+  .stories-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,13 +1,277 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>donate</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Nueva Donación</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">donate</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="donate-container">
+
+    <!-- Header -->
+    <div class="header-section">
+      <ion-icon name="heart" color="danger" class="main-icon"></ion-icon>
+      <h2>¡Gracias por tu generosidad!</h2>
+      <p>Tu donación llegará directamente a quien más lo necesita</p>
+    </div>
+
+    <!-- Selector de Tipo de Donación -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Tipo de Donación</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-segment [(ngModel)]="donationType" (ionChange)="onDonationTypeChange(donationType)">
+          <ion-segment-button [value]="donationTypes.MONEY">
+            <ion-icon name="cash-outline"></ion-icon>
+            <ion-label>Dinero</ion-label>
+          </ion-segment-button>
+          <ion-segment-button [value]="donationTypes.IN_KIND">
+            <ion-icon name="gift-outline"></ion-icon>
+            <ion-label>En Especie</ion-label>
+          </ion-segment-button>
+          <ion-segment-button [value]="donationTypes.SPONSORSHIP">
+            <ion-icon name="heart-outline"></ion-icon>
+            <ion-label>Apadrinamiento</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Formulario de Donación Monetaria -->
+    <ion-card *ngIf="donationType === donationTypes.MONEY">
+      <ion-card-header>
+        <ion-card-title>Donación Monetaria</ion-card-title>
+        <ion-card-subtitle>Ingresa el monto que deseas donar</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Monto (€) *</ion-label>
+          <ion-input type="number" [(ngModel)]="amount" placeholder="0.00" min="1"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Descripción *</ion-label>
+          <ion-textarea
+            [(ngModel)]="description"
+            placeholder="¿Para qué será utilizada esta donación?"
+            rows="3">
+          </ion-textarea>
+        </ion-item>
+
+        <div class="amount-presets ion-margin-top">
+          <ion-button fill="outline" size="small" (click)="amount = 10">10€</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 25">25€</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 50">50€</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 100">100€</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 250">250€</ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Formulario de Donación en Especie -->
+    <ion-card *ngIf="donationType === donationTypes.IN_KIND">
+      <ion-card-header>
+        <ion-card-title>Donación en Especie</ion-card-title>
+        <ion-card-subtitle>Especifica los artículos que donarás</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Categoría *</ion-label>
+          <ion-select [(ngModel)]="category">
+            <ion-select-option [value]="categories.FOOD">{{ getCategoryText('food') }}</ion-select-option>
+            <ion-select-option [value]="categories.CLOTHING">{{ getCategoryText('clothing') }}</ion-select-option>
+            <ion-select-option [value]="categories.EDUCATION">{{ getCategoryText('education') }}</ion-select-option>
+            <ion-select-option [value]="categories.HEALTH">{{ getCategoryText('health') }}</ion-select-option>
+            <ion-select-option [value]="categories.HYGIENE">{{ getCategoryText('hygiene') }}</ion-select-option>
+            <ion-select-option [value]="categories.OTHER">{{ getCategoryText('other') }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Descripción General *</ion-label>
+          <ion-textarea
+            [(ngModel)]="description"
+            placeholder="Describe brevemente tu donación"
+            rows="2">
+          </ion-textarea>
+        </ion-item>
+
+        <!-- Lista de Artículos -->
+        <div class="items-section ion-margin-top">
+          <h4>Artículos</h4>
+
+          <ion-list *ngIf="items.length > 0">
+            <ion-item *ngFor="let item of items; let i = index">
+              <ion-icon name="cube-outline" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.quantity }} {{ item.unit }}</p>
+              </ion-label>
+              <ion-button fill="clear" color="danger" slot="end" (click)="removeItem(i)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-item>
+          </ion-list>
+
+          <div class="add-item-form ion-margin-top">
+            <ion-item>
+              <ion-label position="floating">Nombre del artículo</ion-label>
+              <ion-input [(ngModel)]="newItem.name" placeholder="Ej: Arroz"></ion-input>
+            </ion-item>
+            <div class="quantity-row">
+              <ion-item class="quantity-input">
+                <ion-label position="floating">Cantidad</ion-label>
+                <ion-input type="number" [(ngModel)]="newItem.quantity" min="1"></ion-input>
+              </ion-item>
+              <ion-item class="unit-input">
+                <ion-label position="floating">Unidad</ion-label>
+                <ion-select [(ngModel)]="newItem.unit">
+                  <ion-select-option value="unidades">Unidades</ion-select-option>
+                  <ion-select-option value="kg">Kg</ion-select-option>
+                  <ion-select-option value="litros">Litros</ion-select-option>
+                  <ion-select-option value="paquetes">Paquetes</ion-select-option>
+                  <ion-select-option value="cajas">Cajas</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+            <ion-button expand="block" fill="outline" (click)="addItem()">
+              <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+              Agregar Artículo
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Formulario de Apadrinamiento -->
+    <ion-card *ngIf="donationType === donationTypes.SPONSORSHIP">
+      <ion-card-header>
+        <ion-card-title>Apadrinamiento</ion-card-title>
+        <ion-card-subtitle>Apoya de forma recurrente a un beneficiario</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Monto Mensual (€) *</ion-label>
+          <ion-input type="number" [(ngModel)]="amount" placeholder="0.00" min="1"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Motivo del Apadrinamiento *</ion-label>
+          <ion-textarea
+            [(ngModel)]="description"
+            placeholder="Ej: Para educación, alimentación, etc."
+            rows="3">
+          </ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label>Donación Recurrente</ion-label>
+          <ion-toggle [(ngModel)]="isRecurring" color="success"></ion-toggle>
+        </ion-item>
+
+        <ion-item *ngIf="isRecurring">
+          <ion-label>Frecuencia</ion-label>
+          <ion-select [(ngModel)]="recurringFrequency">
+            <ion-select-option value="monthly">{{ getFrequencyText('monthly') }}</ion-select-option>
+            <ion-select-option value="quarterly">{{ getFrequencyText('quarterly') }}</ion-select-option>
+            <ion-select-option value="annual">{{ getFrequencyText('annual') }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <div class="amount-presets ion-margin-top">
+          <ion-button fill="outline" size="small" (click)="amount = 15">15€/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 30">30€/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 50">50€/mes</ion-button>
+          <ion-button fill="outline" size="small" (click)="amount = 100">100€/mes</ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Selector de Beneficiario -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Beneficiario (Opcional)</ion-card-title>
+        <ion-card-subtitle>Puedes elegir un beneficiario específico o dejar que lo asignemos nosotros</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item button (click)="showBeneficiarySelector = !showBeneficiarySelector">
+          <ion-icon name="people-outline" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h3 *ngIf="!selectedBeneficiaryId">Seleccionar Beneficiario</h3>
+            <h3 *ngIf="selectedBeneficiaryId">
+              {{ beneficiaries.find(b => b.id === selectedBeneficiaryId)?.profileName }}
+            </h3>
+          </ion-label>
+          <ion-icon [name]="showBeneficiarySelector ? 'chevron-up' : 'chevron-down'" slot="end"></ion-icon>
+        </ion-item>
+
+        <ion-list *ngIf="showBeneficiarySelector" class="beneficiary-list">
+          <ion-item button (click)="selectedBeneficiaryId = undefined; showBeneficiarySelector = false">
+            <ion-icon name="shuffle-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Asignar Automáticamente</h3>
+              <p>Lo asignaremos a quien más lo necesite</p>
+            </ion-label>
+            <ion-icon name="checkmark-circle" color="success" *ngIf="!selectedBeneficiaryId" slot="end"></ion-icon>
+          </ion-item>
+
+          <ion-item
+            button
+            *ngFor="let beneficiary of beneficiaries"
+            (click)="selectedBeneficiaryId = beneficiary.id; showBeneficiarySelector = false">
+            <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h3>{{ beneficiary.profileName }}</h3>
+              <p>{{ beneficiary.location }}</p>
+            </ion-label>
+            <ion-icon name="checkmark-circle" color="success" *ngIf="selectedBeneficiaryId === beneficiary.id" slot="end"></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Resumen -->
+    <ion-card class="summary-card">
+      <ion-card-header>
+        <ion-card-title>Resumen</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="summary-item">
+          <span class="label">Tipo:</span>
+          <span class="value">{{ getDonationTypeText(donationType) }}</span>
+        </div>
+        <div class="summary-item" *ngIf="amount > 0">
+          <span class="label">Monto:</span>
+          <span class="value">{{ amount }}€</span>
+        </div>
+        <div class="summary-item" *ngIf="items.length > 0">
+          <span class="label">Artículos:</span>
+          <span class="value">{{ items.length }} artículos</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Beneficiario:</span>
+          <span class="value">
+            {{ selectedBeneficiaryId ? beneficiaries.find(b => b.id === selectedBeneficiaryId)?.profileName : 'Asignación automática' }}
+          </span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botones de Acción -->
+    <div class="action-buttons">
+      <ion-button expand="block" color="primary" size="large" (click)="submitDonation()">
+        <ion-icon name="heart" slot="start"></ion-icon>
+        Realizar Donación
+      </ion-button>
+      <ion-button expand="block" fill="clear" (click)="goBack()">
+        Cancelar
+      </ion-button>
+    </div>
+
+  </div>
 </ion-content>

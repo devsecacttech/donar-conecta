@@ -1,13 +1,116 @@
 <ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Historias de Impacto</ion-title>
+  </ion-toolbar>
+
   <ion-toolbar>
-    <ion-title>impact-stories</ion-title>
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="onSegmentChange($event)">
+      <ion-segment-button value="my">
+        <ion-label>Mis Historias</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="all">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">impact-stories</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="stories-container" *ngIf="!loading">
+
+    <!-- Header Info -->
+    <div class="header-info ion-padding">
+      <ion-icon name="images" color="primary" class="header-icon"></ion-icon>
+      <h2 *ngIf="selectedSegment === 'my'">Tus Historias de Impacto</h2>
+      <h2 *ngIf="selectedSegment === 'all'">Todas las Historias</h2>
+      <p *ngIf="selectedSegment === 'my'">
+        {{ myStories.length }} {{ myStories.length === 1 ? 'historia generada' : 'historias generadas' }} gracias a tus donaciones
+      </p>
+      <p *ngIf="selectedSegment === 'all'">
+        {{ allStories.length }} historias de impacto en nuestra comunidad
+      </p>
+    </div>
+
+    <!-- Empty State -->
+    <ion-card *ngIf="getDisplayedStories().length === 0" class="empty-card">
+      <ion-card-content>
+        <ion-icon name="images-outline" color="medium" class="empty-icon"></ion-icon>
+        <h3>No hay historias aún</h3>
+        <p *ngIf="selectedSegment === 'my'">
+          Realiza una donación y pronto verás el impacto que generaste
+        </p>
+        <p *ngIf="selectedSegment === 'all'">
+          Las historias de impacto aparecerán aquí cuando haya entregas completadas
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Stories Grid -->
+    <div class="stories-grid ion-padding" *ngIf="getDisplayedStories().length > 0">
+      <ion-card
+        *ngFor="let story of getDisplayedStories()"
+        class="story-card"
+        button
+        (click)="viewStoryDetail(story)">
+
+        <!-- Story Image -->
+        <div class="story-image" style="background-image: url('assets/placeholder.jpg')">
+          <div class="story-badge">
+            <ion-badge color="success">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              Entregado
+            </ion-badge>
+          </div>
+        </div>
+
+        <ion-card-content>
+          <!-- Date and Location -->
+          <div class="story-meta">
+            <div class="meta-item">
+              <ion-icon name="calendar-outline" color="primary"></ion-icon>
+              <span>{{ formatDate(story.deliveryDate) }}</span>
+            </div>
+            <div class="meta-item">
+              <ion-icon name="location-outline" color="primary"></ion-icon>
+              <span>{{ story.location }}</span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <p class="story-description">{{ story.description }}</p>
+
+          <!-- Beneficiary Message -->
+          <div class="beneficiary-message" *ngIf="story.beneficiaryMessage">
+            <ion-icon name="chatbubble" color="tertiary"></ion-icon>
+            <em>"{{ story.beneficiaryMessage }}"</em>
+          </div>
+
+          <!-- Footer Info -->
+          <div class="story-footer">
+            <div class="footer-item">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>{{ story.managerName }}</span>
+            </div>
+            <div class="footer-item">
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>{{ story.views }}</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando historias de impacto...</p>
+  </div>
+
 </ion-content>

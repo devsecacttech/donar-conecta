@@ -144,67 +144,87 @@ La aplicación incluye usuarios de prueba con datos mock:
    - Login con validación de roles
    - Guards para protección de rutas
    - Redirección automática según rol
+   - Usuarios demo para cada rol
 
-2. **Dashboard del Donante**
+2. **Dashboard del Donante** ✅
    - Métricas personales (total donado, número de donaciones, historias de impacto)
-   - Donaciones recientes
+   - Donaciones recientes con estados
    - Historias de impacto con fotos
    - Beneficiarios apadrinados
-   - Navegación intuitiva
+   - Navegación intuitiva con tabs
+   - Acciones rápidas
 
-3. **Modelos de Datos Completos**
+3. **Página de Nueva Donación** ✅
+   - Selector de tipo de donación (Dinero, En Especie, Apadrinamiento)
+   - Formulario completo para donación monetaria con presets de cantidad
+   - Formulario para donaciones en especie con lista de artículos
+   - Sistema de apadrinamiento con configuración de frecuencia
+   - Selector de beneficiario (específico o automático)
+   - Resumen de donación
+   - Validación de formularios
+   - Mensajes de confirmación
+
+4. **Galería de Historias de Impacto** ✅
+   - Vista completa de todas las historias
+   - Filtro: "Mis Historias" y "Todas"
+   - Tarjetas con fotos, fechas, ubicación
+   - Mensajes de beneficiarios
+   - Contador de vistas
+   - Información del gestor
+   - Empty states para cuando no hay historias
+   - Diseño responsive en grid
+
+5. **Modelos de Datos Completos**
    - Usuario (con roles: Donante, Gestor, Admin, Beneficiario)
    - Donaciones (dinero, en especie, apadrinamiento)
    - Casos de necesidad
    - Historias de impacto
    - Métricas y estadísticas
 
-4. **Servicios Mock**
+6. **Servicios Mock**
    - AuthService con usuarios de prueba
    - DonationService con donaciones de ejemplo
    - BeneficiaryService con beneficiarios ficticios
    - CaseService para gestión de casos
    - MetricsService para estadísticas
+   - Creación de donaciones en tiempo real
 
-5. **Interfaz de Usuario**
+7. **Interfaz de Usuario**
    - Diseño responsive y amigable
    - Componentes Ionic optimizados
    - Navegación inferior para móviles
    - Tarjetas de métricas visuales
    - Scroll horizontal para historias de impacto
+   - Loading states y spinners
+   - Toasts y alertas
+   - Formularios con validación
 
 ### 🔄 Pendientes para Futuras Iteraciones
 
-1. **Panel del Gestor Solidario**
+1. **Página de Apadrinamiento**
+   - Lista de beneficiarios disponibles para apadrinar
+   - Detalles de cada beneficiario
+   - Sistema de seguimiento de apadrinados
+
+2. **Panel del Gestor Solidario**
+   - Dashboard con métricas del gestor
    - Lista de donaciones asignadas
    - Formulario para reportar entregas
    - Subida de fotos de comprobante
    - Gestión de casos
 
-2. **Panel del Administrador**
+3. **Panel del Administrador**
    - Dashboard con métricas globales
    - Gestión de usuarios
    - Reportes y estadísticas
    - Configuración de la plataforma
 
-3. **Formulario de Donación**
-   - Selección de tipo de donación
-   - Formulario para donación monetaria
-   - Formulario para donación en especie
-   - Configuración de apadrinamiento
-
-4. **Galería de Historias de Impacto**
-   - Vista completa de todas las historias
-   - Filtros y búsqueda
-   - Vista detallada con múltiples fotos
-   - Sistema de likes/reacciones
-
-5. **Sistema de Notificaciones**
+4. **Sistema de Notificaciones**
    - Notificaciones push
    - Alertas de nuevas entregas
    - Recordatorios para apadrinamiento
 
-6. **Integración con Backend**
+5. **Integración con Backend**
    - API REST para comunicación con servidor
    - Autenticación JWT
    - Upload de imágenes a cloud storage
