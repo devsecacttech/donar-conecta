@@ -202,10 +202,7 @@
         <ion-item button (click)="showBeneficiarySelector = !showBeneficiarySelector">
           <ion-icon name="people-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
-            <h3 *ngIf="!selectedBeneficiaryId">Seleccionar Beneficiario</h3>
-            <h3 *ngIf="selectedBeneficiaryId">
-              {{ beneficiaries.find(b => b.id === selectedBeneficiaryId)?.profileName }}
-            </h3>
+            <h3>{{ getSelectedBeneficiaryName() }}</h3>
           </ion-label>
           <ion-icon [name]="showBeneficiarySelector ? 'chevron-up' : 'chevron-down'" slot="end"></ion-icon>
         </ion-item>
@@ -255,9 +252,7 @@
         </div>
         <div class="summary-item">
           <span class="label">Beneficiario:</span>
-          <span class="value">
-            {{ selectedBeneficiaryId ? beneficiaries.find(b => b.id === selectedBeneficiaryId)?.profileName : 'Asignación automática' }}
-          </span>
+          <span class="value">{{ getBeneficiarySummary() }}</span>
         </div>
       </ion-card-content>
     </ion-card>

@@ -203,4 +203,20 @@ export class DonatePage implements OnInit {
   goBack() {
     this.router.navigate(['/donor/dashboard']);
   }
+
+  getSelectedBeneficiaryName(): string {
+    if (!this.selectedBeneficiaryId) {
+      return 'Seleccionar Beneficiario';
+    }
+    const beneficiary = this.beneficiaries.find(b => b.id === this.selectedBeneficiaryId);
+    return beneficiary ? beneficiary.profileName : 'Seleccionar Beneficiario';
+  }
+
+  getBeneficiarySummary(): string {
+    if (!this.selectedBeneficiaryId) {
+      return 'Asignación automática';
+    }
+    const beneficiary = this.beneficiaries.find(b => b.id === this.selectedBeneficiaryId);
+    return beneficiary ? beneficiary.profileName : 'Asignación automática';
+  }
 }
