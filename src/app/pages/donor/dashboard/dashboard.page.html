@@ -1,0 +1,216 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Mi Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container" *ngIf="!loading">
+
+    <!-- Welcome Section -->
+    <div class="welcome-section ion-padding">
+      <h2>¡Hola, {{ donor?.name }}!</h2>
+      <p>Gracias por hacer la diferencia en la vida de muchas personas</p>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="metrics-grid ion-padding">
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <div class="metric-icon">
+            <ion-icon name="cash-outline" color="success"></ion-icon>
+          </div>
+          <div class="metric-value">{{ metrics?.totalDonated || 0 | number:'1.2-2' }}€</div>
+          <div class="metric-label">Total Donado</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <div class="metric-icon">
+            <ion-icon name="gift-outline" color="primary"></ion-icon>
+          </div>
+          <div class="metric-value">{{ metrics?.donationCount || 0 }}</div>
+          <div class="metric-label">Donaciones</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <div class="metric-icon">
+            <ion-icon name="images-outline" color="tertiary"></ion-icon>
+          </div>
+          <div class="metric-value">{{ metrics?.impactStoriesGenerated || 0 }}</div>
+          <div class="metric-label">Historias de Impacto</div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <div class="metric-icon">
+            <ion-icon name="people-outline" color="warning"></ion-icon>
+          </div>
+          <div class="metric-value">{{ metrics?.sponsoredBeneficiaries || 0 }}</div>
+          <div class="metric-label">Apadrinamientos</div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions ion-padding">
+      <h3>Acciones Rápidas</h3>
+      <div class="actions-grid">
+        <ion-button expand="block" color="primary" (click)="navigateToDonate()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Nueva Donación
+        </ion-button>
+        <ion-button expand="block" color="secondary" (click)="navigateToImpactStories()">
+          <ion-icon name="images-outline" slot="start"></ion-icon>
+          Ver Historias
+        </ion-button>
+        <ion-button expand="block" color="tertiary" (click)="navigateToSponsorship()">
+          <ion-icon name="heart-outline" slot="start"></ion-icon>
+          Apadrinar
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Recent Impact Stories -->
+    <div class="impact-stories-section ion-padding" *ngIf="recentImpactStories.length > 0">
+      <div class="section-header">
+        <h3>Historias de Impacto Recientes</h3>
+        <ion-button fill="clear" (click)="navigateToImpactStories()">Ver Todas</ion-button>
+      </div>
+
+      <div class="stories-scroll">
+        <ion-card *ngFor="let story of recentImpactStories" class="impact-story-card" (click)="viewImpactStory(story)">
+          <div class="story-image" [style.background-image]="'url(assets/placeholder.jpg)'">
+            <div class="story-overlay">
+              <ion-badge color="success">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                Entregado
+              </ion-badge>
+            </div>
+          </div>
+          <ion-card-content>
+            <div class="story-header">
+              <ion-icon name="location-outline" color="primary"></ion-icon>
+              <span class="story-location">{{ story.location }}</span>
+              <span class="story-date">{{ formatDate(story.deliveryDate) }}</span>
+            </div>
+            <p class="story-description">{{ story.description }}</p>
+            <div class="story-message" *ngIf="story.beneficiaryMessage">
+              <ion-icon name="chatbubble-outline" color="medium"></ion-icon>
+              <em>"{{ story.beneficiaryMessage }}"</em>
+            </div>
+            <div class="story-footer">
+              <span class="story-manager">
+                <ion-icon name="person-outline"></ion-icon>
+                {{ story.managerName }}
+              </span>
+              <span class="story-views">
+                <ion-icon name="eye-outline"></ion-icon>
+                {{ story.views }} vistas
+              </span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- Recent Donations -->
+    <div class="recent-donations-section ion-padding">
+      <h3>Donaciones Recientes</h3>
+
+      <ion-card *ngIf="recentDonations.length === 0">
+        <ion-card-content class="empty-state">
+          <ion-icon name="gift-outline" color="medium" size="large"></ion-icon>
+          <p>Aún no has realizado ninguna donación</p>
+          <ion-button (click)="navigateToDonate()">Hacer mi primera donación</ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-list *ngIf="recentDonations.length > 0">
+        <ion-item *ngFor="let donation of recentDonations" button detail="false">
+          <ion-icon
+            [name]="donation.type === 'money' ? 'cash-outline' : donation.type === 'sponsorship' ? 'heart-outline' : 'gift-outline'"
+            slot="start"
+            [color]="getDonationStatusColor(donation.status)">
+          </ion-icon>
+          <ion-label>
+            <h2>{{ getDonationTypeText(donation.type) }}</h2>
+            <p>{{ donation.description }}</p>
+            <p *ngIf="donation.amount">
+              <strong>{{ donation.amount }}€</strong>
+            </p>
+            <p class="donation-date">{{ formatDate(donation.createdAt) }}</p>
+          </ion-label>
+          <ion-badge slot="end" [color]="getDonationStatusColor(donation.status)">
+            {{ getDonationStatusText(donation.status) }}
+          </ion-badge>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Sponsored Beneficiaries -->
+    <div class="sponsored-section ion-padding" *ngIf="sponsoredBeneficiaries.length > 0">
+      <h3>Mis Apadrinados</h3>
+
+      <div class="beneficiaries-grid">
+        <ion-card *ngFor="let beneficiary of sponsoredBeneficiaries" class="beneficiary-card">
+          <div class="beneficiary-avatar" style="background-image: url('assets/placeholder.jpg')"></div>
+          <ion-card-content>
+            <h4>{{ beneficiary.profileName }}</h4>
+            <p class="beneficiary-location">
+              <ion-icon name="location-outline"></ion-icon>
+              {{ beneficiary.location }}
+            </p>
+            <p class="beneficiary-situation">{{ beneficiary.situation }}</p>
+            <div class="beneficiary-needs">
+              <ion-badge *ngFor="let need of beneficiary.needs.slice(0, 2)" color="light">
+                {{ need }}
+              </ion-badge>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando tu dashboard...</p>
+  </div>
+
+</ion-content>
+
+<!-- Bottom Navigation -->
+<ion-footer>
+  <ion-toolbar>
+    <ion-segment value="dashboard">
+      <ion-segment-button value="dashboard">
+        <ion-icon name="home"></ion-icon>
+        <ion-label>Inicio</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="donate" (click)="navigateToDonate()">
+        <ion-icon name="add-circle"></ion-icon>
+        <ion-label>Donar</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="stories" (click)="navigateToImpactStories()">
+        <ion-icon name="images"></ion-icon>
+        <ion-label>Historias</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="sponsorship" (click)="navigateToSponsorship()">
+        <ion-icon name="heart"></ion-icon>
+        <ion-label>Apadrinados</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

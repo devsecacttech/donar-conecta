@@ -1,0 +1,89 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Donar Conecta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="heart" color="danger" style="font-size: 80px;"></ion-icon>
+      <h1>Donar Conecta</h1>
+      <p class="subtitle">Conectando corazones, transformando vidas</p>
+    </div>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Iniciar Sesión</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input
+            type="email"
+            [(ngModel)]="email"
+            placeholder="correo@ejemplo.com"
+            autocomplete="email">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input
+            type="password"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            autocomplete="current-password">
+          </ion-input>
+        </ion-item>
+
+        <ion-button
+          expand="block"
+          (click)="login()"
+          class="ion-margin-top"
+          color="primary">
+          <ion-icon name="log-in-outline" slot="start"></ion-icon>
+          Iniciar Sesión
+        </ion-button>
+
+        <div class="demo-section ion-margin-top">
+          <ion-text color="medium">
+            <p><small>Contraseña para demo: <strong>demo123</strong></small></p>
+          </ion-text>
+
+          <h3>Usuarios de Demostración:</h3>
+
+          <ion-list>
+            <ion-item
+              *ngFor="let user of demoUsers"
+              button
+              (click)="loginAsDemo(user.email)"
+              detail="true">
+              <ion-icon
+                [name]="user.role === 'Donante' ? 'people' : user.role === 'Gestor' ? 'briefcase' : 'shield-checkmark'"
+                slot="start"
+                [color]="user.role === 'Donante' ? 'success' : user.role === 'Gestor' ? 'warning' : 'danger'">
+              </ion-icon>
+              <ion-label>
+                <h2>{{ user.name }}</h2>
+                <p>{{ user.role }} - {{ user.email }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="info-section ion-margin-top">
+      <ion-text color="medium">
+        <p class="ion-text-center">
+          <small>
+            Esta es una aplicación de demostración.<br>
+            Todos los datos son ficticios.
+          </small>
+        </p>
+      </ion-text>
+    </div>
+  </div>
+</ion-content>

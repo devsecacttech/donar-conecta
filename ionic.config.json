@@ -1,0 +1,7 @@
+{
+  "name": "donar-conecta",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

@@ -1,0 +1,48 @@
+.login-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.logo-section {
+  text-align: center;
+  margin: 40px 0 30px 0;
+
+  h1 {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--ion-color-primary);
+    margin: 20px 0 10px 0;
+  }
+
+  .subtitle {
+    color: var(--ion-color-medium);
+    font-size: 1.1em;
+    font-style: italic;
+  }
+}
+
+.demo-section {
+  border-top: 1px solid var(--ion-color-light);
+  padding-top: 20px;
+  margin-top: 30px;
+
+  h3 {
+    font-size: 1em;
+    color: var(--ion-color-medium);
+    margin-bottom: 10px;
+  }
+}
+
+.info-section {
+  margin-bottom: 30px;
+}
+
+ion-item {
+  --padding-start: 0;
+  margin-bottom: 15px;
+}
+
+ion-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
