@@ -232,6 +232,157 @@
       </ion-card-content>
     </ion-card>
 
+    <!-- Métodos de Pago -->
+    <ion-card *ngIf="donationType === donationTypes.MONEY || donationType === donationTypes.SPONSORSHIP">
+      <ion-card-header>
+        <ion-card-title>Método de Pago</ion-card-title>
+        <ion-card-subtitle>Selecciona cómo deseas realizar tu donación</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Selector de método de pago -->
+        <ion-segment [(ngModel)]="paymentMethod" scrollable="true">
+          <ion-segment-button value="cash">
+            <ion-icon name="cash-outline"></ion-icon>
+            <ion-label>Efectivo</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="deuna">
+            <ion-icon name="qr-code-outline"></ion-icon>
+            <ion-label>DeUna</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="transfer">
+            <ion-icon name="business-outline"></ion-icon>
+            <ion-label>Transferencia</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="crypto">
+            <ion-icon name="wallet-outline"></ion-icon>
+            <ion-label>Cripto</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- Pago en Efectivo -->
+        <div class="payment-method-detail" *ngIf="paymentMethod === 'cash'">
+          <div class="payment-info">
+            <ion-icon name="cash" color="success"></ion-icon>
+            <h3>Pago en Efectivo</h3>
+            <p>Podrás realizar el pago en efectivo en nuestras oficinas o con uno de nuestros gestores autorizados.</p>
+            <p class="info-text">
+              <ion-icon name="information-circle"></ion-icon>
+              Recibirás la información de contacto una vez confirmes la donación.
+            </p>
+          </div>
+        </div>
+
+        <!-- Pago con DeUna (QR) -->
+        <div class="payment-method-detail" *ngIf="paymentMethod === 'deuna'">
+          <div class="payment-info text-center">
+            <h3>Escanea el código QR con DeUna</h3>
+            <div class="qr-container">
+              <img src="https://i.ibb.co/R4swGmYk/deUna.png" alt="Código QR DeUna" class="qr-image">
+            </div>
+            <p class="info-text">
+              <ion-icon name="information-circle"></ion-icon>
+              Escanea este código con tu app DeUna y confirma el pago.
+            </p>
+            <ion-button expand="block" color="primary" (click)="confirmPayment()">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Confirmar el Pago
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Transferencia Bancaria -->
+        <div class="payment-method-detail" *ngIf="paymentMethod === 'transfer'">
+          <div class="payment-info">
+            <h3>Datos para Transferencia Bancaria</h3>
+            <div class="bank-details">
+              <div class="detail-row">
+                <ion-icon name="business" color="primary"></ion-icon>
+                <div>
+                  <strong>Banco:</strong>
+                  <p>Banco Pichincha</p>
+                </div>
+              </div>
+              <div class="detail-row">
+                <ion-icon name="card" color="primary"></ion-icon>
+                <div>
+                  <strong>Número de Cuenta:</strong>
+                  <p class="account-number">2210725964</p>
+                </div>
+              </div>
+              <div class="detail-row">
+                <ion-icon name="person" color="primary"></ion-icon>
+                <div>
+                  <strong>Tipo de Cuenta:</strong>
+                  <p>Ahorros</p>
+                </div>
+              </div>
+            </div>
+            <p class="info-text">
+              <ion-icon name="information-circle"></ion-icon>
+              Realiza la transferencia y luego confirma para registrar tu donación.
+            </p>
+            <ion-button expand="block" color="primary" (click)="confirmPayment()">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Confirmar la Transferencia
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Pago con Criptomonedas -->
+        <div class="payment-method-detail" *ngIf="paymentMethod === 'crypto'">
+          <div class="payment-info">
+            <h3>Selecciona tu Criptomoneda</h3>
+            <div class="crypto-options">
+              <div class="crypto-option"
+                   [class.selected]="selectedCrypto === 'bnb'"
+                   (click)="selectCrypto('bnb')">
+                <div class="crypto-icon bnb">
+                  <ion-icon name="logo-bitcoin"></ion-icon>
+                </div>
+                <span>BNB</span>
+                <ion-icon name="checkmark-circle" color="success" *ngIf="selectedCrypto === 'bnb'"></ion-icon>
+              </div>
+              <div class="crypto-option"
+                   [class.selected]="selectedCrypto === 'busd'"
+                   (click)="selectCrypto('busd')">
+                <div class="crypto-icon busd">
+                  <ion-icon name="cash"></ion-icon>
+                </div>
+                <span>BUSD</span>
+                <ion-icon name="checkmark-circle" color="success" *ngIf="selectedCrypto === 'busd'"></ion-icon>
+              </div>
+              <div class="crypto-option"
+                   [class.selected]="selectedCrypto === 'usdt'"
+                   (click)="selectCrypto('usdt')">
+                <div class="crypto-icon usdt">
+                  <ion-icon name="wallet"></ion-icon>
+                </div>
+                <span>USDT</span>
+                <ion-icon name="checkmark-circle" color="success" *ngIf="selectedCrypto === 'usdt'"></ion-icon>
+              </div>
+              <div class="crypto-option"
+                   [class.selected]="selectedCrypto === 'bitcoin'"
+                   (click)="selectCrypto('bitcoin')">
+                <div class="crypto-icon bitcoin">
+                  <ion-icon name="logo-bitcoin"></ion-icon>
+                </div>
+                <span>Bitcoin</span>
+                <ion-icon name="checkmark-circle" color="success" *ngIf="selectedCrypto === 'bitcoin'"></ion-icon>
+              </div>
+            </div>
+            <p class="info-text" *ngIf="selectedCrypto">
+              <ion-icon name="information-circle"></ion-icon>
+              Has seleccionado {{ getCryptoText(selectedCrypto) }}. Confirma para continuar.
+            </p>
+            <ion-button expand="block" color="primary" (click)="confirmPayment()" [disabled]="!selectedCrypto">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Confirmar Pago con {{ selectedCrypto ? getCryptoText(selectedCrypto) : 'Cripto' }}
+            </ion-button>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
     <!-- Resumen -->
     <ion-card class="summary-card">
       <ion-card-header>
@@ -253,6 +404,10 @@
         <div class="summary-item">
           <span class="label">Beneficiario:</span>
           <span class="value">{{ getBeneficiarySummary() }}</span>
+        </div>
+        <div class="summary-item" *ngIf="donationType === donationTypes.MONEY || donationType === donationTypes.SPONSORSHIP">
+          <span class="label">Método de Pago:</span>
+          <span class="value">{{ getPaymentMethodText() }}</span>
         </div>
       </ion-card-content>
     </ion-card>

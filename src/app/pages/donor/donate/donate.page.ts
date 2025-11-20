@@ -34,6 +34,11 @@ export class DonatePage implements OnInit {
   beneficiaries: Beneficiary[] = [];
   showBeneficiarySelector: boolean = false;
 
+  // Métodos de pago
+  paymentMethod: 'cash' | 'deuna' | 'transfer' | 'crypto' = 'cash';
+  selectedCrypto?: 'bnb' | 'busd' | 'usdt' | 'bitcoin';
+  showPaymentConfirmation: boolean = false;
+
   loading: boolean = false;
 
   constructor(
@@ -235,6 +240,63 @@ export class DonatePage implements OnInit {
       icon: 'checkmark-circle'
     });
     await toast.present();
+  }
+
+  selectCrypto(crypto: 'bnb' | 'busd' | 'usdt' | 'bitcoin') {
+    this.selectedCrypto = crypto;
+  }
+
+  async confirmPayment() {
+    const methodText = this.getPaymentMethodText();
+
+    const loading = await this.loadingController.create({
+      message: `Confirmando pago por ${methodText}...`,
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    // Simular proceso de confirmación
+    setTimeout(async () => {
+      await loading.dismiss();
+
+      const toast = await this.toastController.create({
+        message: `¡Pago por ${methodText} confirmado exitosamente!`,
+        duration: 2500,
+        position: 'bottom',
+        color: 'success',
+        icon: 'checkmark-circle'
+      });
+      await toast.present();
+
+      this.showPaymentConfirmation = false;
+
+      // Proceder con la donación
+      this.submitDonation();
+    }, 1500);
+  }
+
+  getPaymentMethodText(): string {
+    switch (this.paymentMethod) {
+      case 'cash': return 'Efectivo';
+      case 'deuna': return 'DeUna (QR)';
+      case 'transfer': return 'Transferencia Bancaria';
+      case 'crypto':
+        if (this.selectedCrypto) {
+          return this.getCryptoText(this.selectedCrypto);
+        }
+        return 'Criptomoneda';
+      default: return 'Pago';
+    }
+  }
+
+  getCryptoText(crypto: string): string {
+    const cryptoMap: { [key: string]: string } = {
+      'bnb': 'BNB',
+      'busd': 'BUSD',
+      'usdt': 'USDT',
+      'bitcoin': 'Bitcoin'
+    };
+    return cryptoMap[crypto] || crypto.toUpperCase();
   }
 
   goBack() {

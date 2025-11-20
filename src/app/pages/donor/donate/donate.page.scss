@@ -120,6 +120,206 @@ ion-item {
   margin-bottom: 12px;
 }
 
+// Estilos para métodos de pago
+.payment-method-detail {
+  margin-top: 1.5rem;
+
+  .payment-info {
+    padding: 1rem 0;
+
+    &.text-center {
+      text-align: center;
+    }
+
+    > ion-icon {
+      font-size: 3rem;
+      display: block;
+      margin: 0 auto 1rem;
+    }
+
+    h3 {
+      color: var(--ion-color-dark);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: var(--ion-color-medium-shade);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .info-text {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--ion-color-light);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--ion-color-medium-shade);
+      margin-top: 1rem;
+
+      ion-icon {
+        font-size: 1.2rem;
+        color: var(--ion-color-primary);
+      }
+    }
+  }
+
+  // QR Code
+  .qr-container {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+
+    .qr-image {
+      max-width: 280px;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+
+  // Bank Details
+  .bank-details {
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+
+    .detail-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+
+      &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      ion-icon {
+        font-size: 1.5rem;
+        margin-top: 0.25rem;
+      }
+
+      div {
+        flex: 1;
+
+        strong {
+          display: block;
+          color: var(--ion-color-dark);
+          font-size: 0.9rem;
+          margin-bottom: 0.25rem;
+        }
+
+        p {
+          margin: 0;
+          color: var(--ion-color-medium-shade);
+          font-size: 1rem;
+        }
+
+        .account-number {
+          font-size: 1.3rem;
+          font-weight: 600;
+          color: var(--ion-color-primary);
+          letter-spacing: 1px;
+        }
+      }
+    }
+  }
+
+  // Crypto Options
+  .crypto-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .crypto-option {
+      position: relative;
+      padding: 1.5rem 1rem;
+      background: var(--ion-color-light);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      }
+
+      &.selected {
+        border-color: var(--ion-color-success);
+        background: rgba(var(--ion-color-success-rgb), 0.1);
+
+        .crypto-icon {
+          background: var(--ion-color-success);
+          color: white;
+        }
+      }
+
+      .crypto-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 0.75rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        transition: all 0.3s ease;
+
+        &.bnb {
+          background: linear-gradient(135deg, #f3ba2f 0%, #ffd166 100%);
+          color: white;
+        }
+
+        &.busd {
+          background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+          color: white;
+        }
+
+        &.usdt {
+          background: linear-gradient(135deg, #26a17b 0%, #50af95 100%);
+          color: white;
+        }
+
+        &.bitcoin {
+          background: linear-gradient(135deg, #f7931a 0%, #ffb74d 100%);
+          color: white;
+        }
+      }
+
+      span {
+        display: block;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        font-size: 1rem;
+      }
+
+      > ion-icon[name="checkmark-circle"] {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        font-size: 1.5rem;
+      }
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .amount-presets {
     ion-button {
