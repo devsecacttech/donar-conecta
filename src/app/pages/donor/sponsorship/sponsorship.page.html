@@ -1,13 +1,347 @@
 <ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Apadrinamiento</ion-title>
+  </ion-toolbar>
+
   <ion-toolbar>
-    <ion-title>sponsorship</ion-title>
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="onSegmentChange($event)">
+      <ion-segment-button value="available">
+        <ion-label>Disponibles</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="sponsored">
+        <ion-label>Mis Apadrinados</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">sponsorship</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="sponsorship-container" *ngIf="!loading">
+
+    <!-- Beneficiarios Disponibles -->
+    <div *ngIf="selectedSegment === 'available'">
+
+      <!-- Info Header -->
+      <ion-card class="info-card">
+        <ion-card-content>
+          <div class="info-header">
+            <ion-icon name="heart-circle" color="danger"></ion-icon>
+            <div class="info-text">
+              <h3>Cambia una vida con tu apadrinamiento</h3>
+              <p>Tu aporte mensual ayuda a familias vulnerables a salir adelante</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Empty State -->
+      <ion-card *ngIf="availableBeneficiaries.length === 0" class="empty-card">
+        <ion-card-content>
+          <ion-icon name="heart-outline" color="medium" class="empty-icon"></ion-icon>
+          <h3>No hay beneficiarios disponibles</h3>
+          <p>Actualmente todos los beneficiarios tienen padrinos asignados</p>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Beneficiaries Grid -->
+      <div class="beneficiaries-grid ion-padding" *ngIf="availableBeneficiaries.length > 0">
+        <ion-card *ngFor="let beneficiary of availableBeneficiaries" button (click)="openSponsorModal(beneficiary)" class="beneficiary-card">
+          <div class="beneficiary-image" [style.background-image]="'url(assets/placeholder.jpg)'">
+            <ion-badge color="primary" class="location-badge">
+              <ion-icon name="location"></ion-icon>
+              {{ beneficiary.location }}
+            </ion-badge>
+          </div>
+          <ion-card-content>
+            <h3>{{ beneficiary.profileName }}</h3>
+
+            <div class="beneficiary-info">
+              <div class="info-row" *ngIf="beneficiary.age">
+                <ion-icon name="person-outline" color="primary"></ion-icon>
+                <span>{{ beneficiary.age }} años</span>
+              </div>
+              <div class="info-row" *ngIf="beneficiary.familySize">
+                <ion-icon name="people-outline" color="secondary"></ion-icon>
+                <span>{{ beneficiary.familySize }} miembros</span>
+              </div>
+            </div>
+
+            <p class="situation">{{ beneficiary.situation }}</p>
+
+            <div class="needs-section">
+              <p class="needs-title">Necesidades:</p>
+              <div class="needs-list">
+                <ion-chip *ngFor="let need of beneficiary.needs" color="tertiary">
+                  <ion-icon name="checkmark-circle"></ion-icon>
+                  <ion-label>{{ need }}</ion-label>
+                </ion-chip>
+              </div>
+            </div>
+
+            <ion-button expand="block" color="success" (click)="openSponsorModal(beneficiary); $event.stopPropagation()">
+              <ion-icon name="heart" slot="start"></ion-icon>
+              Apadrinar Ahora
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+    </div>
+
+    <!-- Apadrinamientos Activos -->
+    <div *ngIf="selectedSegment === 'sponsored'">
+
+      <!-- Empty State -->
+      <ion-card *ngIf="sponsoredBeneficiaries.length === 0" class="empty-card">
+        <ion-card-content>
+          <ion-icon name="heart-outline" color="medium" class="empty-icon"></ion-icon>
+          <h3>Aún no tienes apadrinados</h3>
+          <p>Explora los beneficiarios disponibles y cambia una vida hoy</p>
+          <ion-button expand="block" (click)="selectedSegment = 'available'; onSegmentChange({detail: {value: 'available'}})">
+            Ver Disponibles
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Sponsored Beneficiaries -->
+      <div class="sponsored-list ion-padding" *ngIf="sponsoredBeneficiaries.length > 0">
+        <ion-card *ngFor="let beneficiary of sponsoredBeneficiaries" class="sponsored-card">
+          <ion-card-content>
+            <div class="sponsored-header">
+              <div class="beneficiary-avatar" [style.background-image]="'url(assets/placeholder.jpg)'"></div>
+              <div class="beneficiary-details">
+                <h3>{{ beneficiary.profileName }}</h3>
+                <p class="location">
+                  <ion-icon name="location-outline"></ion-icon>
+                  {{ beneficiary.location }}
+                </p>
+                <ion-badge color="success">
+                  <ion-icon name="heart"></ion-icon>
+                  Activo desde {{ formatDate(beneficiary.createdAt) }}
+                </ion-badge>
+              </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section" *ngIf="beneficiary.progress">
+              <h4>Progreso del Beneficiario</h4>
+
+              <div class="progress-item" *ngIf="beneficiary.progress.education">
+                <ion-icon name="school" color="primary"></ion-icon>
+                <div class="progress-text">
+                  <strong>Educación:</strong>
+                  <p>{{ beneficiary.progress.education }}</p>
+                </div>
+              </div>
+
+              <div class="progress-item" *ngIf="beneficiary.progress.health">
+                <ion-icon name="medkit" color="danger"></ion-icon>
+                <div class="progress-text">
+                  <strong>Salud:</strong>
+                  <p>{{ beneficiary.progress.health }}</p>
+                </div>
+              </div>
+
+              <div class="progress-item" *ngIf="beneficiary.progress.housing">
+                <ion-icon name="home" color="warning"></ion-icon>
+                <div class="progress-text">
+                  <strong>Vivienda:</strong>
+                  <p>{{ beneficiary.progress.housing }}</p>
+                </div>
+              </div>
+
+              <!-- Recent Updates -->
+              <div class="updates-section" *ngIf="beneficiary.progress.updates && beneficiary.progress.updates.length > 0">
+                <h4>Últimas Actualizaciones</h4>
+                <div class="update-item" *ngFor="let update of beneficiary.progress.updates.slice(0, 2)">
+                  <div class="update-date">{{ formatDate(update.date) }}</div>
+                  <h5>{{ update.title }}</h5>
+                  <p>{{ update.description }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+              <ion-button expand="block" fill="outline" color="danger" (click)="cancelSponsorship(beneficiary)">
+                <ion-icon name="close-circle" slot="start"></ion-icon>
+                Cancelar Apadrinamiento
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando beneficiarios...</p>
+  </div>
+
 </ion-content>
+
+<!-- Sponsorship Modal -->
+<ion-modal [isOpen]="showSponsorModal" (didDismiss)="closeSponsorModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="success">
+        <ion-title>Iniciar Apadrinamiento</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeSponsorModal()">
+            <ion-icon name="close" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <div *ngIf="selectedBeneficiary">
+
+        <!-- Beneficiary Summary -->
+        <ion-card>
+          <div class="modal-beneficiary-header" [style.background-image]="'url(assets/placeholder.jpg)'">
+            <div class="overlay">
+              <h2>{{ selectedBeneficiary.profileName }}</h2>
+              <p>
+                <ion-icon name="location"></ion-icon>
+                {{ selectedBeneficiary.location }}
+              </p>
+            </div>
+          </div>
+          <ion-card-content>
+            <p class="situation">{{ selectedBeneficiary.situation }}</p>
+
+            <div class="needs-chips">
+              <ion-chip *ngFor="let need of selectedBeneficiary.needs" color="tertiary">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <ion-label>{{ need }}</ion-label>
+              </ion-chip>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Sponsorship Form -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Detalles del Apadrinamiento</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+
+            <!-- Amount Selection -->
+            <div class="form-section">
+              <ion-label>Monto Mensual *</ion-label>
+              <div class="amount-buttons">
+                <ion-button
+                  *ngFor="let amount of suggestedAmounts"
+                  [fill]="sponsorshipAmount === amount ? 'solid' : 'outline'"
+                  [color]="sponsorshipAmount === amount ? 'success' : 'medium'"
+                  (click)="selectAmount(amount)">
+                  {{ amount }}€
+                </ion-button>
+              </div>
+
+              <ion-item>
+                <ion-label position="floating">Monto personalizado (€)</ion-label>
+                <ion-input
+                  type="number"
+                  [(ngModel)]="sponsorshipAmount"
+                  min="10"
+                  placeholder="Ingresa un monto">
+                </ion-input>
+              </ion-item>
+            </div>
+
+            <!-- Frequency Selection -->
+            <div class="form-section">
+              <ion-label>Frecuencia de Pago</ion-label>
+              <ion-radio-group [(ngModel)]="sponsorshipFrequency">
+                <ion-item>
+                  <ion-radio slot="start" value="monthly"></ion-radio>
+                  <ion-label>
+                    <h3>Mensual</h3>
+                    <p>{{ sponsorshipAmount }}€ cada mes</p>
+                  </ion-label>
+                </ion-item>
+
+                <ion-item>
+                  <ion-radio slot="start" value="quarterly"></ion-radio>
+                  <ion-label>
+                    <h3>Trimestral</h3>
+                    <p>{{ sponsorshipAmount * 3 }}€ cada 3 meses</p>
+                  </ion-label>
+                </ion-item>
+
+                <ion-item>
+                  <ion-radio slot="start" value="annual"></ion-radio>
+                  <ion-label>
+                    <h3>Anual</h3>
+                    <p>{{ sponsorshipAmount * 12 }}€ al año</p>
+                  </ion-label>
+                </ion-item>
+              </ion-radio-group>
+            </div>
+
+            <!-- Personal Message -->
+            <div class="form-section">
+              <ion-item>
+                <ion-label position="floating">Mensaje Personal (Opcional)</ion-label>
+                <ion-textarea
+                  [(ngModel)]="sponsorshipMessage"
+                  placeholder="Escribe un mensaje de apoyo..."
+                  rows="3">
+                </ion-textarea>
+              </ion-item>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Summary Card -->
+        <ion-card class="summary-card">
+          <ion-card-header>
+            <ion-card-title>Resumen</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="summary-row">
+              <span>Beneficiario:</span>
+              <strong>{{ selectedBeneficiary.profileName }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Frecuencia:</span>
+              <strong>{{ getFrequencyText(sponsorshipFrequency) }}</strong>
+            </div>
+            <div class="summary-row highlight">
+              <span>Total a donar:</span>
+              <strong class="amount">{{ sponsorshipAmount }}€</strong>
+            </div>
+            <p class="summary-note">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              El apadrinamiento se renovará automáticamente. Puedes cancelarlo en cualquier momento.
+            </p>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Submit Button -->
+        <ion-button
+          expand="block"
+          color="success"
+          size="large"
+          class="submit-btn"
+          (click)="startSponsorship()">
+          <ion-icon name="heart" slot="start"></ion-icon>
+          Confirmar Apadrinamiento
+        </ion-button>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
