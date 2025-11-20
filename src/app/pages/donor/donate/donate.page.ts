@@ -65,11 +65,48 @@ export class DonatePage implements OnInit {
     this.isRecurring = false;
   }
 
-  addItem() {
-    if (this.newItem.name && this.newItem.quantity > 0) {
-      this.items.push({ ...this.newItem });
-      this.newItem = { name: '', quantity: 1, unit: 'unidades' };
+  async addItem() {
+    // Validar que el nombre no esté vacío
+    if (!this.newItem.name || !this.newItem.name.trim()) {
+      const toast = await this.toastController.create({
+        message: 'Por favor ingresa el nombre del artículo',
+        duration: 2000,
+        position: 'bottom',
+        color: 'warning',
+        icon: 'alert-circle'
+      });
+      await toast.present();
+      return;
     }
+
+    // Validar que la cantidad sea mayor a 0
+    if (!this.newItem.quantity || this.newItem.quantity <= 0) {
+      const toast = await this.toastController.create({
+        message: 'Por favor ingresa una cantidad válida',
+        duration: 2000,
+        position: 'bottom',
+        color: 'warning',
+        icon: 'alert-circle'
+      });
+      await toast.present();
+      return;
+    }
+
+    // Agregar el artículo a la lista
+    this.items.push({ ...this.newItem });
+
+    // Mostrar mensaje de éxito
+    const toast = await this.toastController.create({
+      message: `"${this.newItem.name}" agregado correctamente`,
+      duration: 1500,
+      position: 'bottom',
+      color: 'success',
+      icon: 'checkmark-circle'
+    });
+    await toast.present();
+
+    // Resetear el formulario
+    this.newItem = { name: '', quantity: 1, unit: 'unidades' };
   }
 
   removeItem(index: number) {
