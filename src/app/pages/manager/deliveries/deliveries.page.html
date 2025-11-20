@@ -1,13 +1,247 @@
 <ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Entregas</ion-title>
+  </ion-toolbar>
+
   <ion-toolbar>
-    <ion-title>deliveries</ion-title>
+    <ion-segment [(ngModel)]="selectedFilter" (ionChange)="onFilterChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>Todas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pending">
+        <ion-label>Pendientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="in_process">
+        <ion-label>En Proceso</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="delivered">
+        <ion-label>Entregadas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">deliveries</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="deliveries-container" *ngIf="!loading">
+
+    <!-- Empty State -->
+    <ion-card *ngIf="filteredDeliveries.length === 0" class="empty-card">
+      <ion-card-content>
+        <ion-icon name="cube-outline" color="medium" class="empty-icon"></ion-icon>
+        <h3>No hay entregas</h3>
+        <p>No se encontraron entregas con el filtro seleccionado</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Deliveries List -->
+    <div class="deliveries-list ion-padding" *ngIf="filteredDeliveries.length > 0">
+      <ion-card *ngFor="let delivery of filteredDeliveries" class="delivery-card">
+        <ion-card-content>
+          <!-- Header -->
+          <div class="delivery-header">
+            <ion-badge [color]="getStatusColor(delivery.status)">
+              {{ getStatusText(delivery.status) }}
+            </ion-badge>
+            <span class="delivery-date">{{ formatDate(delivery.createdAt) }}</span>
+          </div>
+
+          <!-- Type and Description -->
+          <h3>{{ getDonationTypeText(delivery.type) }}</h3>
+          <p class="delivery-description">{{ delivery.description }}</p>
+
+          <!-- Delivery Info -->
+          <div class="delivery-info">
+            <div class="info-item" *ngIf="delivery.amount">
+              <ion-icon name="cash-outline" color="success"></ion-icon>
+              <span>{{ delivery.amount }}€</span>
+            </div>
+            <div class="info-item">
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              <span>{{ delivery.donorName }}</span>
+            </div>
+            <div class="info-item" *ngIf="delivery.items && delivery.items.length > 0">
+              <ion-icon name="cube-outline" color="secondary"></ion-icon>
+              <span>{{ delivery.items.length }} artículos</span>
+            </div>
+          </div>
+
+          <!-- Items List (if in-kind donation) -->
+          <div class="items-list" *ngIf="delivery.items && delivery.items.length > 0">
+            <p class="items-title">Artículos:</p>
+            <div class="item" *ngFor="let item of delivery.items">
+              <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+              <span>{{ item.name }} - {{ item.quantity }} {{ item.unit }}</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <ion-button
+              *ngIf="delivery.status === 'pending'"
+              expand="block"
+              fill="outline"
+              (click)="markAsInProcess(delivery)">
+              <ion-icon name="play-circle-outline" slot="start"></ion-icon>
+              Iniciar Proceso
+            </ion-button>
+
+            <ion-button
+              *ngIf="delivery.status === 'pending' || delivery.status === 'in_process'"
+              expand="block"
+              color="success"
+              (click)="openReportModal(delivery)">
+              <ion-icon name="camera-outline" slot="start"></ion-icon>
+              Reportar Entrega
+            </ion-button>
+
+            <ion-button
+              *ngIf="delivery.status === 'delivered'"
+              expand="block"
+              fill="outline"
+              color="success"
+              disabled>
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Entrega Completada
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando entregas...</p>
+  </div>
+
 </ion-content>
+
+<!-- Report Delivery Modal -->
+<ion-modal [isOpen]="showReportModal" (didDismiss)="closeReportModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Reportar Entrega</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeReportModal()">
+            <ion-icon name="close" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <div *ngIf="selectedDelivery">
+
+        <!-- Delivery Summary -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>{{ getDonationTypeText(selectedDelivery.type) }}</ion-card-title>
+            <ion-card-subtitle>{{ selectedDelivery.donorName }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ selectedDelivery.description }}</p>
+            <div class="summary-amount" *ngIf="selectedDelivery.amount">
+              <strong>Monto:</strong> {{ selectedDelivery.amount }}€
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Report Form -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Detalles de la Entrega</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+
+            <ion-item>
+              <ion-label position="floating">Ubicación de Entrega *</ion-label>
+              <ion-input
+                [(ngModel)]="reportLocation"
+                placeholder="Ej: Madrid Centro, Calle Mayor 123">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="floating">Mensaje del Beneficiario</ion-label>
+              <ion-textarea
+                [(ngModel)]="beneficiaryMessage"
+                placeholder="Testimonio o mensaje de agradecimiento"
+                rows="3">
+              </ion-textarea>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="floating">Notas Adicionales</ion-label>
+              <ion-textarea
+                [(ngModel)]="deliveryNotes"
+                placeholder="Comentarios sobre la entrega"
+                rows="3">
+              </ion-textarea>
+            </ion-item>
+
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Photo Upload -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Fotos de Comprobante *</ion-card-title>
+            <ion-card-subtitle>Sube al menos una foto de la entrega</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+
+            <!-- Uploaded Photos -->
+            <div class="photos-grid" *ngIf="uploadedPhotos.length > 0">
+              <div class="photo-item" *ngFor="let photo of uploadedPhotos; let i = index">
+                <div class="photo-preview" [style.background-image]="'url(' + photo + ')'">
+                  <ion-button
+                    fill="clear"
+                    color="danger"
+                    class="remove-photo-btn"
+                    (click)="removePhoto(i)">
+                    <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Button -->
+            <ion-button
+              expand="block"
+              fill="outline"
+              (click)="simulatePhotoUpload()">
+              <ion-icon name="camera-outline" slot="start"></ion-icon>
+              Agregar Foto
+            </ion-button>
+
+            <p class="upload-info">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              Las fotos son simuladas en este MVP
+            </p>
+
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Submit Button -->
+        <ion-button
+          expand="block"
+          color="success"
+          size="large"
+          class="submit-btn"
+          (click)="submitDeliveryReport()">
+          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+          Confirmar Entrega
+        </ion-button>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

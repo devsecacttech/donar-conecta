@@ -1,13 +1,223 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>dashboard</ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>Panel del Gestor</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">dashboard</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="dashboard-container" *ngIf="!loading">
+
+    <!-- Welcome Section -->
+    <div class="welcome-section ion-padding">
+      <ion-icon name="people" color="light"></ion-icon>
+      <h1>¡Hola, {{ managerName }}!</h1>
+      <p>Gestiona tus entregas y casos asignados</p>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="metrics-grid ion-padding">
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="file-tray-full" color="primary"></ion-icon>
+          <h2>{{ metrics?.assignedCases || 0 }}</h2>
+          <p>Casos Asignados</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="time" color="warning"></ion-icon>
+          <h2>{{ metrics?.pendingDeliveries || 0 }}</h2>
+          <p>Entregas Pendientes</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <h2>{{ metrics?.completedDeliveries || 0 }}</h2>
+          <p>Entregas Completadas</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="images" color="tertiary"></ion-icon>
+          <h2>{{ metrics?.impactStoriesCreated || 0 }}</h2>
+          <p>Historias Creadas</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="people-outline" color="secondary"></ion-icon>
+          <h2>{{ metrics?.beneficiariesServed || 0 }}</h2>
+          <p>Beneficiarios Atendidos</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="metric-card">
+        <ion-card-content>
+          <ion-icon name="speedometer" color="primary"></ion-icon>
+          <h2>{{ metrics?.averageDeliveryTime || 0 }}</h2>
+          <p>Días Promedio</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions ion-padding">
+      <h3>Acciones Rápidas</h3>
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="navigateToDeliveries()">
+          <ion-icon name="cube-outline" slot="start"></ion-icon>
+          Ver Entregas Pendientes
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="navigateToCases()">
+          <ion-icon name="folder-open-outline" slot="start"></ion-icon>
+          Gestionar Casos
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Pending Deliveries -->
+    <div class="section ion-padding" *ngIf="pendingDeliveries.length > 0">
+      <div class="section-header">
+        <h3>Entregas Pendientes</h3>
+        <ion-button fill="clear" size="small" (click)="navigateToDeliveries()">
+          Ver Todas
+          <ion-icon name="chevron-forward" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+      <ion-card *ngFor="let delivery of pendingDeliveries" button (click)="navigateToDelivery(delivery.id)">
+        <ion-card-content>
+          <div class="delivery-header">
+            <ion-badge [color]="getStatusColor(delivery.status)">
+              {{ getStatusText(delivery.status) }}
+            </ion-badge>
+            <span class="delivery-date">{{ formatDate(delivery.createdAt) }}</span>
+          </div>
+
+          <h4>{{ getDonationTypeText(delivery.type) }}</h4>
+          <p class="delivery-description">{{ delivery.description }}</p>
+
+          <div class="delivery-info">
+            <div class="info-item" *ngIf="delivery.amount">
+              <ion-icon name="cash-outline" color="success"></ion-icon>
+              <span>{{ delivery.amount }}€</span>
+            </div>
+            <div class="info-item">
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              <span>{{ delivery.donorName }}</span>
+            </div>
+            <div class="info-item" *ngIf="delivery.beneficiaryId">
+              <ion-icon name="location-outline" color="tertiary"></ion-icon>
+              <span>Beneficiario asignado</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Assigned Cases -->
+    <div class="section ion-padding" *ngIf="assignedCases.length > 0">
+      <div class="section-header">
+        <h3>Casos Asignados</h3>
+        <ion-button fill="clear" size="small" (click)="navigateToCases()">
+          Ver Todos
+          <ion-icon name="chevron-forward" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+
+      <ion-card *ngFor="let case of assignedCases" button (click)="navigateToCase(case.id)">
+        <ion-card-content>
+          <div class="case-header">
+            <ion-badge [color]="getPriorityColor(case.priority)">
+              {{ getPriorityText(case.priority) }}
+            </ion-badge>
+            <span class="case-date">{{ formatDate(case.createdAt) }}</span>
+          </div>
+
+          <h4>{{ case.title }}</h4>
+          <p class="case-description">{{ case.description }}</p>
+
+          <div class="case-footer">
+            <div class="info-item">
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              <span>{{ case.beneficiaryName }}</span>
+            </div>
+            <div class="info-item">
+              <ion-icon name="cube-outline" color="secondary"></ion-icon>
+              <span>{{ case.receivedDonations.length }} donaciones</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Recent Impact Stories -->
+    <div class="section ion-padding" *ngIf="recentImpactStories.length > 0">
+      <div class="section-header">
+        <h3>Mis Historias de Impacto</h3>
+      </div>
+
+      <div class="impact-stories-scroll">
+        <ion-card *ngFor="let story of recentImpactStories" class="impact-story-card">
+          <div class="story-image" style="background-image: url('assets/placeholder.jpg')">
+            <ion-badge color="success">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              Entregado
+            </ion-badge>
+          </div>
+          <ion-card-content>
+            <p class="story-date">{{ formatDate(story.deliveryDate) }}</p>
+            <p class="story-description">{{ story.description }}</p>
+            <div class="story-stats">
+              <ion-icon name="location-outline"></ion-icon>
+              <span>{{ story.location }}</span>
+              <ion-icon name="eye-outline"></ion-icon>
+              <span>{{ story.views }}</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state ion-padding" *ngIf="pendingDeliveries.length === 0 && assignedCases.length === 0">
+      <ion-icon name="checkmark-done-circle-outline" color="success"></ion-icon>
+      <h3>¡Todo al día!</h3>
+      <p>No tienes entregas ni casos pendientes en este momento</p>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
 </ion-content>
+
+<!-- Bottom Navigation -->
+<ion-footer>
+  <ion-toolbar>
+    <ion-segment value="dashboard">
+      <ion-segment-button value="dashboard" (click)="navigateToDeliveries()">
+        <ion-icon name="cube-outline"></ion-icon>
+        <ion-label>Entregas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="cases" (click)="navigateToCases()">
+        <ion-icon name="folder-outline"></ion-icon>
+        <ion-label>Casos</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>

@@ -1,13 +1,256 @@
 <ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Casos</ion-title>
+  </ion-toolbar>
+
   <ion-toolbar>
-    <ion-title>cases</ion-title>
+    <ion-segment [(ngModel)]="selectedFilter" (ionChange)="onFilterChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="open">
+        <ion-label>Abiertos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="in_progress">
+        <ion-label>En Progreso</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="completed">
+        <ion-label>Completados</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">cases</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="cases-container" *ngIf="!loading">
+
+    <!-- Empty State -->
+    <ion-card *ngIf="filteredCases.length === 0" class="empty-card">
+      <ion-card-content>
+        <ion-icon name="folder-open-outline" color="medium" class="empty-icon"></ion-icon>
+        <h3>No hay casos</h3>
+        <p>No se encontraron casos con el filtro seleccionado</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Cases List -->
+    <div class="cases-list ion-padding" *ngIf="filteredCases.length > 0">
+      <ion-card *ngFor="let case of filteredCases" button (click)="openDetailModal(case)" class="case-card">
+        <ion-card-content>
+          <!-- Header -->
+          <div class="case-header">
+            <div class="badges">
+              <ion-badge [color]="getPriorityColor(case.priority)">
+                {{ getPriorityText(case.priority) }}
+              </ion-badge>
+              <ion-badge [color]="getStatusColor(case.status)">
+                {{ getStatusText(case.status) }}
+              </ion-badge>
+            </div>
+            <span class="case-date">{{ formatDate(case.createdAt) }}</span>
+          </div>
+
+          <!-- Title and Description -->
+          <h3>{{ case.title }}</h3>
+          <p class="case-description">{{ case.description }}</p>
+
+          <!-- Case Info -->
+          <div class="case-info">
+            <div class="info-item">
+              <ion-icon name="person-outline" color="primary"></ion-icon>
+              <span>{{ case.beneficiaryName }}</span>
+            </div>
+            <div class="info-item">
+              <ion-icon name="cube-outline" color="secondary"></ion-icon>
+              <span>{{ case.receivedDonations.length }} donaciones</span>
+            </div>
+            <div class="info-item" *ngIf="case.notes && case.notes.length > 0">
+              <ion-icon name="chatbubble-outline" color="tertiary"></ion-icon>
+              <span>{{ case.notes.length }} notas</span>
+            </div>
+          </div>
+
+          <!-- Required Donations -->
+          <div class="requirements" *ngIf="case.requiredDonations && case.requiredDonations.length > 0">
+            <p class="requirements-title">Necesidades:</p>
+            <div class="requirement" *ngFor="let req of case.requiredDonations">
+              <ion-icon
+                [name]="req.fulfilled ? 'checkmark-circle' : 'ellipse-outline'"
+                [color]="req.fulfilled ? 'success' : 'medium'">
+              </ion-icon>
+              <span [class.fulfilled]="req.fulfilled">
+                {{ req.category }} - {{ req.description }}
+                <span class="cost" *ngIf="req.estimatedCost">({{ req.estimatedCost }}€)</span>
+              </span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando casos...</p>
+  </div>
+
 </ion-content>
+
+<!-- Case Detail Modal -->
+<ion-modal [isOpen]="showDetailModal" (didDismiss)="closeDetailModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Detalles del Caso</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeDetailModal()">
+            <ion-icon name="close" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <div *ngIf="selectedCase">
+
+        <!-- Case Summary -->
+        <ion-card>
+          <ion-card-header>
+            <div class="modal-header">
+              <ion-card-title>{{ selectedCase.title }}</ion-card-title>
+              <div class="modal-badges">
+                <ion-badge [color]="getPriorityColor(selectedCase.priority)">
+                  {{ getPriorityText(selectedCase.priority) }}
+                </ion-badge>
+                <ion-badge [color]="getStatusColor(selectedCase.status)">
+                  {{ getStatusText(selectedCase.status) }}
+                </ion-badge>
+              </div>
+            </div>
+            <ion-card-subtitle>{{ selectedCase.beneficiaryName }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ selectedCase.description }}</p>
+
+            <div class="case-meta">
+              <div class="meta-item">
+                <strong>Creado:</strong> {{ formatDate(selectedCase.createdAt) }}
+              </div>
+              <div class="meta-item">
+                <strong>Última actualización:</strong> {{ formatDate(selectedCase.updatedAt) }}
+              </div>
+              <div class="meta-item" *ngIf="selectedCase.completedAt">
+                <strong>Completado:</strong> {{ formatDate(selectedCase.completedAt) }}
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Required Donations -->
+        <ion-card *ngIf="selectedCase.requiredDonations && selectedCase.requiredDonations.length > 0">
+          <ion-card-header>
+            <ion-card-title>Necesidades</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none">
+              <ion-item *ngFor="let req of selectedCase.requiredDonations">
+                <ion-icon
+                  slot="start"
+                  [name]="req.fulfilled ? 'checkmark-circle' : 'ellipse-outline'"
+                  [color]="req.fulfilled ? 'success' : 'medium'">
+                </ion-icon>
+                <ion-label>
+                  <h3>{{ req.category }}</h3>
+                  <p>{{ req.description }}</p>
+                  <p *ngIf="req.estimatedCost"><strong>Coste estimado:</strong> {{ req.estimatedCost }}€</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Status Actions -->
+        <ion-card *ngIf="selectedCase.status !== 'completed' && selectedCase.status !== 'closed'">
+          <ion-card-header>
+            <ion-card-title>Actualizar Estado</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="status-buttons">
+              <ion-button
+                *ngIf="selectedCase.status === 'open'"
+                expand="block"
+                color="primary"
+                (click)="updateCaseStatus(CaseStatus.IN_PROGRESS)">
+                <ion-icon name="play-circle-outline" slot="start"></ion-icon>
+                Iniciar Progreso
+              </ion-button>
+
+              <ion-button
+                *ngIf="selectedCase.status === 'in_progress'"
+                expand="block"
+                color="success"
+                (click)="updateCaseStatus(CaseStatus.COMPLETED)">
+                <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                Marcar como Completado
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Notes Section -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Notas ({{ (selectedCase.notes?.length || 0) }})</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+
+            <!-- Existing Notes -->
+            <div class="notes-list" *ngIf="selectedCase.notes && selectedCase.notes.length > 0">
+              <div class="note-item" *ngFor="let note of selectedCase.notes">
+                <div class="note-header">
+                  <strong>{{ note.authorName }}</strong>
+                  <span class="note-date">{{ formatDateTime(note.createdAt) }}</span>
+                </div>
+                <p class="note-content">{{ note.content }}</p>
+              </div>
+            </div>
+
+            <p *ngIf="!selectedCase.notes || selectedCase.notes.length === 0" class="no-notes">
+              No hay notas aún
+            </p>
+
+            <!-- Add New Note -->
+            <div class="add-note-form">
+              <ion-item>
+                <ion-label position="floating">Agregar Nota</ion-label>
+                <ion-textarea
+                  [(ngModel)]="newNote"
+                  placeholder="Escribe una nota sobre este caso..."
+                  rows="3">
+                </ion-textarea>
+              </ion-item>
+
+              <ion-button
+                expand="block"
+                fill="outline"
+                (click)="addNoteToCase()"
+                [disabled]="!newNote.trim()">
+                <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+                Agregar Nota
+              </ion-button>
+            </div>
+
+          </ion-card-content>
+        </ion-card>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
