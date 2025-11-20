@@ -92,6 +92,23 @@ const routes: Routes = [
       }
     ]
   },
+  // Rutas para Beneficiarios
+  {
+    path: 'beneficiary',
+    canActivate: [authGuard],
+    data: { roles: [UserRole.BENEFICIARY] },
+    children: [
+      {
+        path: 'dashboard',
+        loadChildren: () => import('./pages/beneficiary/dashboard/dashboard.module').then( m => m.DashboardPageModule)
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
+  },
   {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)

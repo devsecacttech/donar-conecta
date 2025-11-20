@@ -1,0 +1,271 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Mi Panel</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container" *ngIf="!loading && beneficiary && stats">
+
+    <!-- Welcome Section -->
+    <div class="welcome-section ion-padding">
+      <div class="profile-header">
+        <div class="avatar">
+          <ion-icon name="person" color="light"></ion-icon>
+        </div>
+        <div class="profile-info">
+          <h1>{{ beneficiary.profileName }}</h1>
+          <p class="location">
+            <ion-icon name="location"></ion-icon>
+            {{ beneficiary.location }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid ion-padding">
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="cash" color="success"></ion-icon>
+          <h2>{{ formatCurrency(stats.totalDonationsReceived) }}</h2>
+          <p>Donaciones Recibidas</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="gift" color="primary"></ion-icon>
+          <h2>{{ formatNumber(stats.totalDonationCount) }}</h2>
+          <p>Total de Donaciones</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="heart" color="danger"></ion-icon>
+          <h2>{{ formatNumber(stats.activeSponsorships) }}</h2>
+          <p>Apadrinamientos Activos</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- View Selector -->
+    <div class="view-selector ion-padding">
+      <ion-segment [(ngModel)]="selectedView" (ionChange)="onViewChange($event)">
+        <ion-segment-button value="overview">
+          <ion-label>Resumen</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="donations">
+          <ion-label>Donaciones</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="progress">
+          <ion-label>Progreso</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Overview View -->
+    <div *ngIf="selectedView === 'overview'">
+
+      <!-- Situation Card -->
+      <ion-card class="info-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="information-circle" color="primary"></ion-icon>
+            Nuestra Situación
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="situation-text">{{ beneficiary.situation }}</p>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Current Needs -->
+      <ion-card class="needs-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="list" color="tertiary"></ion-icon>
+            Necesidades Actuales
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="needs-list">
+            <div class="need-item" *ngFor="let need of beneficiary.needs">
+              <ion-icon [name]="getNeedIcon(need)" [color]="getNeedColor(need)"></ion-icon>
+              <span>{{ need }}</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Recent Donations -->
+      <ion-card class="recent-donations-card" *ngIf="stats.recentDonations.length > 0">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="time" color="warning"></ion-icon>
+            Donaciones Recientes
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full">
+            <ion-item *ngFor="let donation of stats.recentDonations">
+              <ion-icon [name]="donation.type === 'sponsorship' ? 'heart' : 'gift'" slot="start" [color]="donation.type === 'sponsorship' ? 'danger' : 'primary'"></ion-icon>
+              <ion-label>
+                <h3>{{ getDonationType(donation.type) }}</h3>
+                <p>{{ formatDate(donation.createdAt) }}</p>
+                <p *ngIf="donation.description" class="description">{{ donation.description }}</p>
+              </ion-label>
+              <div slot="end" class="amount">
+                <strong>{{ formatCurrency(donation.amount || 0) }}</strong>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+    </div>
+
+    <!-- Donations View -->
+    <div *ngIf="selectedView === 'donations'" class="ion-padding">
+      <ion-card class="donations-list-card">
+        <ion-card-header>
+          <ion-card-title>Historial de Donaciones</ion-card-title>
+          <ion-card-subtitle>Todas las donaciones recibidas</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full" *ngIf="stats.recentDonations.length > 0">
+            <ion-item *ngFor="let donation of stats.recentDonations">
+              <ion-icon [name]="donation.type === 'sponsorship' ? 'heart' : 'gift'"
+                        slot="start"
+                        [color]="donation.type === 'sponsorship' ? 'danger' : 'primary'"></ion-icon>
+              <ion-label>
+                <h2>{{ getDonationType(donation.type) }}</h2>
+                <p class="date">{{ formatDate(donation.createdAt) }}</p>
+                <p *ngIf="donation.description" class="description">{{ donation.description }}</p>
+                <p *ngIf="donation.category">
+                  <ion-badge color="medium">{{ getCategoryName(donation.category) }}</ion-badge>
+                </p>
+                <p *ngIf="donation.recurring?.active" class="recurring">
+                  <ion-badge color="success">
+                    <ion-icon name="sync"></ion-icon>
+                    Recurrente
+                  </ion-badge>
+                </p>
+              </ion-label>
+              <div slot="end" class="amount-section">
+                <strong class="amount">{{ formatCurrency(donation.amount || 0) }}</strong>
+                <ion-badge [color]="donation.status === 'delivered' ? 'success' : 'warning'">
+                  {{ donation.status === 'delivered' ? 'Entregada' : 'Pendiente' }}
+                </ion-badge>
+              </div>
+            </ion-item>
+          </ion-list>
+          <div class="empty-state" *ngIf="stats.recentDonations.length === 0">
+            <ion-icon name="gift-outline" color="medium"></ion-icon>
+            <p>No hay donaciones registradas</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Progress View -->
+    <div *ngIf="selectedView === 'progress'" class="ion-padding">
+
+      <!-- Progress Summary -->
+      <ion-card class="progress-summary-card" *ngIf="beneficiary.progress">
+        <ion-card-header>
+          <ion-card-title>Estado del Progreso</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="progress-areas">
+            <div class="progress-area" *ngIf="beneficiary.progress.education">
+              <div class="area-header">
+                <ion-icon name="school" color="tertiary"></ion-icon>
+                <strong>Educación</strong>
+              </div>
+              <p>{{ beneficiary.progress.education }}</p>
+            </div>
+
+            <div class="progress-area" *ngIf="beneficiary.progress.health">
+              <div class="area-header">
+                <ion-icon name="medkit" color="danger"></ion-icon>
+                <strong>Salud</strong>
+              </div>
+              <p>{{ beneficiary.progress.health }}</p>
+            </div>
+
+            <div class="progress-area" *ngIf="beneficiary.progress.housing">
+              <div class="area-header">
+                <ion-icon name="home" color="warning"></ion-icon>
+                <strong>Vivienda</strong>
+              </div>
+              <p>{{ beneficiary.progress.housing }}</p>
+            </div>
+
+            <div class="progress-area" *ngIf="beneficiary.progress.notes">
+              <div class="area-header">
+                <ion-icon name="document-text" color="medium"></ion-icon>
+                <strong>Notas Generales</strong>
+              </div>
+              <p>{{ beneficiary.progress.notes }}</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Progress Updates -->
+      <ion-card class="progress-updates-card" *ngIf="beneficiary.progress && beneficiary.progress.updates && beneficiary.progress.updates.length > 0">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="refresh-circle" color="success"></ion-icon>
+            Actualizaciones
+          </ion-card-title>
+          <ion-card-subtitle>Seguimiento del gestor</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="updates-timeline">
+            <div class="update-item" *ngFor="let update of beneficiary.progress!.updates">
+              <div class="update-date">
+                <ion-icon name="calendar"></ion-icon>
+                {{ formatDate(update.date) }}
+              </div>
+              <div class="update-content">
+                <h3>{{ update.title }}</h3>
+                <p>{{ update.description }}</p>
+                <div class="update-photos" *ngIf="update.photos && update.photos.length > 0">
+                  <div class="photo-placeholder" *ngFor="let photo of update.photos">
+                    <ion-icon name="image"></ion-icon>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="empty-state-card" *ngIf="!beneficiary.progress || !beneficiary.progress.updates || beneficiary.progress.updates.length === 0">
+        <ion-card>
+          <ion-card-content>
+            <ion-icon name="information-circle-outline" color="medium"></ion-icon>
+            <p>No hay actualizaciones de progreso disponibles</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+</ion-content>
