@@ -166,6 +166,11 @@ export class CaseService {
     return this.cases$;
   }
 
+  // Admin method: Get all cases in the system
+  getAllCases(): Observable<Case[]> {
+    return of(this.casesSubject.value).pipe(delay(300));
+  }
+
   getCaseById(id: string): Observable<Case | undefined> {
     return of(this.casesSubject.value.find(c => c.id === id)).pipe(delay(300));
   }
@@ -216,6 +221,44 @@ export class CaseService {
 
           this.casesSubject.next([...cases]);
           observer.next(cases[index]);
+          observer.complete();
+        } else {
+          observer.error({ message: 'Caso no encontrado' });
+        }
+      }, 500);
+    });
+  }
+
+  updateCasePriority(caseId: string, priority: CasePriority): Observable<Case> {
+    return new Observable(observer => {
+      setTimeout(() => {
+        const cases = this.casesSubject.value;
+        const index = cases.findIndex(c => c.id === caseId);
+
+        if (index !== -1) {
+          cases[index].priority = priority;
+          cases[index].updatedAt = new Date();
+
+          this.casesSubject.next([...cases]);
+          observer.next(cases[index]);
+          observer.complete();
+        } else {
+          observer.error({ message: 'Caso no encontrado' });
+        }
+      }, 500);
+    });
+  }
+
+  deleteCase(caseId: string): Observable<boolean> {
+    return new Observable(observer => {
+      setTimeout(() => {
+        const cases = this.casesSubject.value;
+        const index = cases.findIndex(c => c.id === caseId);
+
+        if (index !== -1) {
+          cases.splice(index, 1);
+          this.casesSubject.next([...cases]);
+          observer.next(true);
           observer.complete();
         } else {
           observer.error({ message: 'Caso no encontrado' });

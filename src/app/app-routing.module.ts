@@ -86,6 +86,10 @@ const routes: Routes = [
         loadChildren: () => import('./pages/admin/reports/reports.module').then( m => m.ReportsPageModule)
       },
       {
+        path: 'cases',
+        loadChildren: () => import('./pages/admin/cases/cases.module').then( m => m.CasesPageModule)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
